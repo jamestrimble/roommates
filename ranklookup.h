@@ -14,7 +14,7 @@ public:
     }
     void initialise(int n) {};
     void reserve_space(int i, int size) {};
-    void clear() {};
+    void clear(int i) {};
     ~RankLookupLinearScan() {};
 };
 
@@ -30,9 +30,8 @@ public:
             rank.push_back(std::unordered_map<int, int>());
     }
     void reserve_space(int i, int size) { rank[i].reserve(size); }
-    void clear() {
-        for (std::unordered_map<int, int>::size_type i=0; i<rank.size(); i++)
-            rank[i].clear();
+    void clear(int i) {
+         rank[i].clear();
     }
     ~RankLookupMap() {}
 private:
@@ -53,7 +52,7 @@ public:
             rank[i] = rankBlock + i*n;
     }
     void reserve_space(int i, int size) {}
-    void clear() {}
+    void clear(int i) {}
     ~RankLookupArray() {
         if (rank) {
             delete[] rank[0];

@@ -64,9 +64,8 @@ void SRSat<RankLookupType>::read(std::string filename) {
     
     rank_lookup.initialise(n);
 
-    for (int i=0; i<n; i++) {
+    for (int i=0; i<n; i++)
         pref.push_back(std::vector<int>());
-    }
 
     for (int i=0; i<n; i++) {
         std::getline(file, line);
@@ -150,71 +149,76 @@ public:
  */
 template<class RankLookupType>
 void SRSat<RankLookupType>::shrink() {
-    // For each agent i in q, we look at the person j that q likes most,
+    // q is the list of free agents.
+    // For each agent i in q, we look at the person j that i likes most,
     // and remove everything worse than agent i in j's preference list
-    std::queue<Pair> q;
+    std::queue<int> q;
 
     // For each of the n agents, we keep track of the index of the first
     // non-removed item on their preference list
     std::vector<int> first(n, 0);
-
-    // Can agent i be matched with his jth preference?
-    std::vector<std::vector<bool> > possible;
-    for (int i=0; i<n; i++) {
-        // TODO: Maybe the +1 isn't needed here?
-        possible.push_back(std::vector<bool>(length[i]+1, true));
-    }
-
-    for (int i=0; i<n; i++) {
-        if (length[i] > 0) {
-            q.push(Pair(i, pref[i][0]));
-        }
-    }
     
+    // If prop_from[i] == j, then j is semiengaged to i
+    std::vector<int> prop_from(n, -1);
+
+    for (int i=0; i<n; i++)
+        if (length[i] > 0)
+            q.push(i);
+    
+    process_queue:
     while (!q.empty()) {
-        Pair p = q.front();
+        int i = q.front();
         q.pop();
-        int j = p.b;
-        int k = rank_lookup.get_rank(j, p.a, pref); // k is position of i in j's pref list
-        for (int l=k+1; l<length[j]; l++) { // l is a position in j's pref list
-            int m = pref[j][l];  // m is someone who ranks worse than i in
-                                 // j's preference list
-            if (possible[j][l]) {
-                possible[j][l] = false;
-                int rmj = rank_lookup.get_rank(m, j, pref);
-                possible[m][rmj] = false;
-                if (rmj == first[m]) {
-                    do {
-                        first[m]++;
-                        // TODO: I think that this if statement could be moved
-                        // below the do-while loop, or something like that?
-                        if (pref[m][first[m]] != m) {
-                            q.push(Pair(m, pref[m][first[m]]));
-                        }
-                    } while (!possible[m][first[m]]);
-                }
-            }
+
+        int j = pref[i][first[i]];
+        //std::cout << first[i] << "   " << i << " " << j << std::endl;
+        int k = rank_lookup.get_rank(j, i, pref); // k is position of i in j's pref list
+        //std::cout << first[i] << "   " << i << " " << j << " " << k << std::endl;
+        while (k >= length[j]) {
+            if (i == j) goto process_queue;
+            first[i]++;
+            j = pref[i][first[i]];
+            k = rank_lookup.get_rank(j, i, pref);
+            //std::cout << first[i] << "   " << i << " " << j << " " << k << "!" << std::endl;
         }
+
+//        if (j == i) std::cout << "j == i  " << i << std::endl;
+
+        if (prop_from[j] != -1) {
+            int proposer = prop_from[j];
+            q.push(proposer);
+        }
+
+        prop_from[j] = i;
+
         if (length[j] > k+1) length[j] = k+1;
     }
 
-    rank_lookup.clear();
+    std::vector<std::vector<int> > shrunk_pref;
+
     for (int i=0; i<n; i++) {
         int j;   // other agent
-        int k=0; // position in shrunk preference list
-        for (int l=0; l<length[i]; l++) {
+        shrunk_pref.push_back(std::vector<int>());
+        for (int l=first[i]; l<length[i]; l++) {
             j=pref[i][l];
-            if (possible[i][l]) {
-                rank_lookup.set_rank(i, j, k);
-                pref[i][k] = j;
-                ++k;
-            }
+            //std::cout << j << " " << i << " " << rank_lookup.get_rank(j, i, pref) << "  " << length[j] << std::endl;
+
+            if (rank_lookup.get_rank(j, i, pref) < length[j])
+                shrunk_pref[i].push_back(j);
         }
-        rank_lookup.set_rank(i, i, k);
-        pref[i][k] = i;
-        length[i] = k;
+        shrunk_pref[i].push_back(i);
     }
-    
+
+    for (int i=0; i<n; i++) {
+        rank_lookup.clear(i);
+        for (std::vector<int>::size_type k=0; k<shrunk_pref[i].size(); k++) {
+            rank_lookup.set_rank(i, shrunk_pref[i][k], k);
+            //std::cout << "setting rank " << i << " " << shrunk_pref[i][k] << " " << k << std::endl;
+        }
+        length[i] = shrunk_pref[i].size() - 1;
+        //std::cout << "length " << i << " " << length[i] << std::endl;
+    }
+    pref = std::move(shrunk_pref);
 }
 
 
@@ -247,6 +251,7 @@ std::vector<int> SRSat<RankLookupType>::find_rotation(
 
 template<class RankLookupType>
 bool SRSat<RankLookupType>::phase2() {
+
     // Can agent i be matched with his jth preference?
     std::vector<std::vector<bool> > possible;
     // How many elements of possible[i] are set to true?
