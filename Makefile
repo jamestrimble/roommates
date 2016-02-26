@@ -1,5 +1,5 @@
 sr: sr.cc generator/generator.cpp ranklookup.h
-	g++ --std=c++11 -o sr -O2 -I ../minisat/minisat sr.cc \
+	g++ --std=c++11 -o sr -O3 -I ../minisat/minisat sr.cc \
 	           generator/generator.cpp \
 	           -lboost_program_options \
                -Wall
