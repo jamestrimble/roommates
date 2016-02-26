@@ -136,13 +136,6 @@ void SRSat<RankLookupType>::show() {
 
 }
 
-class Pair {
-public:
-    int a;
-    int b;
-    Pair(int a, int b): a(a), b(b) {}
-};
-
 
 /*
  * Reduce the problem instance size
@@ -171,18 +164,13 @@ void SRSat<RankLookupType>::shrink() {
         q.pop();
 
         int j = pref[i][first[i]];
-        //std::cout << first[i] << "   " << i << " " << j << std::endl;
         int k = rank_lookup.get_rank(j, i, pref); // k is position of i in j's pref list
-        //std::cout << first[i] << "   " << i << " " << j << " " << k << std::endl;
         while (k >= length[j]) {
             if (i == j) goto process_queue;
             first[i]++;
             j = pref[i][first[i]];
             k = rank_lookup.get_rank(j, i, pref);
-            //std::cout << first[i] << "   " << i << " " << j << " " << k << "!" << std::endl;
         }
-
-//        if (j == i) std::cout << "j == i  " << i << std::endl;
 
         if (prop_from[j] != -1) {
             int proposer = prop_from[j];
@@ -201,7 +189,6 @@ void SRSat<RankLookupType>::shrink() {
         shrunk_pref.push_back(std::vector<int>());
         for (int l=first[i]; l<length[i]; l++) {
             j=pref[i][l];
-            //std::cout << j << " " << i << " " << rank_lookup.get_rank(j, i, pref) << "  " << length[j] << std::endl;
 
             if (rank_lookup.get_rank(j, i, pref) < length[j])
                 shrunk_pref[i].push_back(j);
@@ -211,12 +198,10 @@ void SRSat<RankLookupType>::shrink() {
 
     for (int i=0; i<n; i++) {
         rank_lookup.clear(i);
-        for (std::vector<int>::size_type k=0; k<shrunk_pref[i].size(); k++) {
+        for (std::vector<int>::size_type k=0; k<shrunk_pref[i].size(); k++)
             rank_lookup.set_rank(i, shrunk_pref[i][k], k);
-            //std::cout << "setting rank " << i << " " << shrunk_pref[i][k] << " " << k << std::endl;
-        }
+
         length[i] = shrunk_pref[i].size() - 1;
-        //std::cout << "length " << i << " " << length[i] << std::endl;
     }
     pref = std::move(shrunk_pref);
 }
@@ -236,7 +221,6 @@ std::vector<int> SRSat<RankLookupType>::find_rotation(
     std::vector<int> first_pos_in_walk(n, -1);
     
     while (first_pos_in_walk[x] == -1) {
-//        std::cout << x << " " << pref[x][fst[x]] << "!" << std::endl;
         first_pos_in_walk[x] = walk.size();
         walk.push_back(x);
         int y = pref[x][snd[x]]; // x's second-preference agent
@@ -278,7 +262,6 @@ bool SRSat<RankLookupType>::phase2() {
         if (length[i] == 0) fst[i] = -1; // Otherwise it's zero
         snd[i] = length[i]==1 ? -1 : 1;
         last[i] = length[i]-1;
-        //std::cout << "    " << pref[i][length[i]] << std::endl;
     }
     
     while (first_with_at_least_2 < n) {
@@ -293,9 +276,7 @@ bool SRSat<RankLookupType>::phase2() {
         for (int i=0; i<rotation_xs.size(); i++) {
             int x = rotation_xs[i];
             int ynext = rotation_ynexts[i];
-            //std::cout << x << " " << ynext << " " << std::endl;
             int rx = rank_lookup.get_rank(ynext, x, pref); // rank of x in ynext's pref list
-            //std::cout << rx << "#" << std::endl;
             for (int j=rx+1; j<=last[ynext]; j++) {
                 if (possible[ynext][j]) {
                     num_possible[ynext]--;
@@ -305,16 +286,10 @@ bool SRSat<RankLookupType>::phase2() {
                     int k = pref[ynext][j];
                     int pos = rank_lookup.get_rank(k, ynext, pref);
                     num_possible[k]--;
-                    if (num_possible[k] == 0) {
-                        //std::cout << "-- UNSTABLE --" << std::endl;
-                        return false;
-                    }
+                    if (num_possible[k] == 0) return false;
                     possible[k][pos] = false;
                     if (pos==fst[k]) {
-                        if (num_possible[k] >= 1) {
-                            fst[k] = snd[k];
-                            //std::cout << "---" << fst[k] << snd[k] << std::endl;
-                        }
+                        if (num_possible[k] >= 1) fst[k] = snd[k];
                         if (num_possible[k] >= 2) {
                             do {
                                 ++snd[k];
@@ -328,30 +303,11 @@ bool SRSat<RankLookupType>::phase2() {
             }
             last[ynext] = rx;
         }
-//        for (int i=0; i<n; i++) {
-//            for (int j=0; j<length[i]; j++) {
-//                std::cout.width(4);
-//                std::cout << possible[i][j];
-//            }
-//            std::cout << std::endl;
-//            std::cout << fst[i] << " " << snd[i] << " " << last[i] << "   " << num_possible[i] << std::endl;
-//            std::cout << std::endl;
-//        }
-
 
         while (num_possible[first_with_at_least_2] < 2)
             first_with_at_least_2++;
-
-        //std::cout << "Press Enter to Continue";
-        //std::cin.ignore();
     }
 
-//    std::cout << "-- STABLE --" << std::endl;
-
-//    for (int i=0; i<n; i++) {
-//        if (num_possible[i])
-//            std::cout << i << " " << pref[i][fst[i]] << std::endl;
-//    }
     return true;
 }
 
