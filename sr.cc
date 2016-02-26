@@ -246,12 +246,11 @@ bool SRSat<RankLookupType>::phase2() {
     // snd[i] is the position in i's list of i's second preference.
     // These are -1 if no such element exists.
     std::vector<int> fst(n);
-    std::vector<int> snd(n);
+    std::vector<int> snd(n, 1);
     std::vector<int> last(n);
     for (int i=0; i<n; i++) {
         // TODO: maybe we don't need to set -1? -- just check last[i]?
         if (length[i] == 0) fst[i] = -1; // Otherwise it's zero
-        snd[i] = length[i]<=1 ? -1 : 1;
         last[i] = length[i]-1;
         if (length[i] >= 2 && first_with_at_least_2 == n)
             first_with_at_least_2 = i;
@@ -287,11 +286,8 @@ bool SRSat<RankLookupType>::phase2() {
                     possible[k][pos] = false;
                     if (pos==fst[k]) {
                         fst[k] = snd[k];
-                        if (fst[k] != last[k]) {
-                            do {
-                                ++snd[k];
-                            } while (!possible[k][snd[k]]);
-                        }
+                        if (fst[k] != last[k])
+                            do { ++snd[k]; } while (!possible[k][snd[k]]);
                     } else if (pos==snd[k]) {
                         // set new snd[k]
                         while (!possible[k][snd[k]]) ++snd[k];
