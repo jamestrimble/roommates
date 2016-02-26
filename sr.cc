@@ -27,9 +27,6 @@ public:
             std::vector<int>& last, int x);
     SRSat();
     ~SRSat();
-//protected:
-//    void set_rank(int i, int j, int rank);
-//    int get_rank(int i, int j);
 
 private:
     RankLookupType rank_lookup;
