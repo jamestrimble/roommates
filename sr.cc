@@ -1,9 +1,3 @@
-/*
- * This program determines whether an SRI instance read from standard
- * input has a stable solution. Currently, it doesn't count or show
- * stable solutions.
- */
-
 #include "generator/generator.h"
 #include "ranklookup.h"
 #include <cmath>
