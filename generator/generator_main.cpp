@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 
         std::cout << n << std::endl;
         
-        std::mt19937 rgen;
+        std::mt19937_64 rgen;
         rgen.seed(seed);
         std::vector<std::vector<int> > pref_lists = generate(n, p, rgen);
         for (int i=0; i<n; i++) {

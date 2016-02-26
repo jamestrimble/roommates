@@ -11,7 +11,7 @@
 
 inline int how_many_to_choose(double p,
                      unsigned int t, // maximum possible number to choose
-                     std::mt19937& rgen) {
+                     std::mt19937_64& rgen) {
     std::binomial_distribution<int> binom_dist(t, p);
     return binom_dist(rgen);
 }
@@ -25,7 +25,7 @@ inline int how_many_to_choose(double p,
  * order in big_list
  */
 std::vector<int> random_subset(int end, double p,
-                std::vector<int>& big_list, std::mt19937& rgen) {
+                std::vector<int>& big_list, std::mt19937_64& rgen) {
     int how_many = how_many_to_choose(p, end, rgen);
 
     std::vector<int> result;
@@ -45,7 +45,7 @@ std::vector<int> random_subset(int end, double p,
     return result;
 }
 
-std::vector<std::vector<int> > generate(unsigned int n, double p, std::mt19937& rgen) {
+std::vector<std::vector<int> > generate(unsigned int n, double p, std::mt19937_64& rgen) {
     std::vector<int> big_list;
     for (unsigned int i=0; i<n; i++) {
         big_list.push_back(i);

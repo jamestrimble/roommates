@@ -7,7 +7,7 @@
 void generate(unsigned int n, double p, unsigned int seed) {
     std::cout << n << std::endl;
 
-    std::mt19937 rgen;
+    std::mt19937_64 rgen;
     rgen.seed(seed);
     std::uniform_real_distribution<double> dis(0.0, 1.0);
 

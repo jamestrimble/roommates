@@ -346,7 +346,7 @@ int random_run(double timeout, unsigned int n, double p, unsigned int seed) {
     int stable_count = 0;
     unsigned int num_instances = 0;
     clock_t start_time = clock();
-    std::mt19937 rgen;
+    std::mt19937_64 rgen;
     rgen.seed(seed);
     while (true) {
         SRSat<RankLookupType> srSat;
