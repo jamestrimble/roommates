@@ -238,18 +238,9 @@ bool SRSat<RankLookupType>::phase2() {
 
     // Can agent i be matched with his jth preference?
     std::vector<std::vector<bool> > possible;
-    // How many elements of possible[i] are set to true?
-    std::vector<int> num_possible(n);
-    int num_at_least_2 = 0; // Number of agents with at least 2 possible agents on pref list
     int first_with_at_least_2 = n; // First agent with at least 2 possible agents on pref list
-    for (int i=0; i<n; i++) {
+    for (int i=0; i<n; i++)
         possible.push_back(std::vector<bool>(length[i], true));
-        num_possible[i] = length[i];
-        if (num_possible[i] >= 2) {
-            num_at_least_2++;
-            if (first_with_at_least_2 == n) first_with_at_least_2 = i;
-        }
-    }
 
     // fst[i] is the position in i's list of i's first preference.
     // snd[i] is the position in i's list of i's second preference.
@@ -260,8 +251,10 @@ bool SRSat<RankLookupType>::phase2() {
     for (int i=0; i<n; i++) {
         // TODO: maybe we don't need to set -1? -- just check last[i]?
         if (length[i] == 0) fst[i] = -1; // Otherwise it's zero
-        snd[i] = length[i]==1 ? -1 : 1;
+        snd[i] = length[i]<=1 ? -1 : 1;
         last[i] = length[i]-1;
+        if (length[i] >= 2 && first_with_at_least_2 == n)
+            first_with_at_least_2 = i;
     }
     
     while (first_with_at_least_2 < n) {
@@ -279,23 +272,27 @@ bool SRSat<RankLookupType>::phase2() {
             int rx = rank_lookup.get_rank(ynext, x, pref); // rank of x in ynext's pref list
             for (int j=rx+1; j<=last[ynext]; j++) {
                 if (possible[ynext][j]) {
-                    num_possible[ynext]--;
                     possible[ynext][j] = false;  // <-- TODO unnecessary, I think.
                     
                     // delete ynext from pref list of pref[ynext][j]
                     int k = pref[ynext][j];
                     int pos = rank_lookup.get_rank(k, ynext, pref);
-                    num_possible[k]--;
-                    if (num_possible[k] == 0) return false;
+                    if (fst[k] == last[k]) {
+                        return false;
+                    } else if (pos==last[k]) {
+                        // TODO: can this ever happen?
+                        std::cout << "eek!" << std::endl;
+                    }
+
                     possible[k][pos] = false;
                     if (pos==fst[k]) {
-                        if (num_possible[k] >= 1) fst[k] = snd[k];
-                        if (num_possible[k] >= 2) {
+                        fst[k] = snd[k];
+                        if (fst[k] != last[k]) {
                             do {
                                 ++snd[k];
                             } while (!possible[k][snd[k]]);
                         }
-                    } else if (pos==snd[k] && num_possible[k] >= 2) {
+                    } else if (pos==snd[k]) {
                         // set new snd[k]
                         while (!possible[k][snd[k]]) ++snd[k];
                     }
@@ -304,7 +301,7 @@ bool SRSat<RankLookupType>::phase2() {
             last[ynext] = rx;
         }
 
-        while (num_possible[first_with_at_least_2] < 2)
+        while (fst[first_with_at_least_2] == last[first_with_at_least_2])
             first_with_at_least_2++;
     }
 
