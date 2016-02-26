@@ -20,7 +20,7 @@ class SRSat {
 public:
     void read(std::string filename);
     void create(std::vector<std::vector<int> > instance);  // create from generated instance
-    void shrink();
+    void phase1();
     void show();
     bool phase2();
     std::vector<int> find_rotation(std::vector<int>& fst, std::vector<int>& snd,
@@ -30,14 +30,10 @@ public:
 
 private:
     RankLookupType rank_lookup;
-
-    int n;
-
+    int n;   // number of agents
     std::vector<std::vector<int> > pref; // Same as in Patrick's SR.java:
                 // pref[i][k] = j <-> agent_i has agent_j as k^th choice
-
     std::vector<int> length; // length of agent's preference list
-
 };
 
 template<class RankLookupType>
@@ -112,10 +108,7 @@ void SRSat<RankLookupType>::create(std::vector<std::vector<int> > instance) {
 
 int digit_count(int x) {
     int dc = 0;
-    while (x > 0) {
-        ++dc;
-        x /= 10;
-    }
+    while (x > 0) { ++dc; x /= 10; }
     return dc;
 }
 
@@ -133,15 +126,12 @@ void SRSat<RankLookupType>::show() {
         std::cout << std::endl;
     }
     std::cout.width(ss);
-
 }
 
-
-/*
- * Reduce the problem instance size
- */
 template<class RankLookupType>
-void SRSat<RankLookupType>::shrink() {
+void SRSat<RankLookupType>::phase1() {
+    // This implementation is partly based on Mertens' paper on random instances.
+
     // q is the list of free agents.
     // For each agent i in q, we look at the person j that i likes most,
     // and remove everything worse than agent i in j's preference list
@@ -206,7 +196,6 @@ void SRSat<RankLookupType>::shrink() {
     pref = std::move(shrunk_pref);
 }
 
-
 ///////////////////////////////////////////
 ////////  Phase 2
 ///////////////////////////////////////////
@@ -226,7 +215,6 @@ std::vector<int> SRSat<RankLookupType>::find_rotation(
         int y = pref[x][snd[x]]; // x's second-preference agent
         x = pref[y][last[y]];
     }
-    // TODO: walk around graph
 
     std::vector<int> rotation(walk.begin() + first_pos_in_walk[x], walk.end());
 
@@ -249,7 +237,6 @@ bool SRSat<RankLookupType>::phase2() {
     std::vector<int> snd(n, 1);
     std::vector<int> last(n);
     for (int i=0; i<n; i++) {
-        // TODO: maybe we don't need to set -1? -- just check last[i]?
         if (length[i] == 0) fst[i] = -1; // Otherwise it's zero
         last[i] = length[i]-1;
         if (length[i] >= 2 && first_with_at_least_2 == n)
@@ -271,7 +258,7 @@ bool SRSat<RankLookupType>::phase2() {
             int rx = rank_lookup.get_rank(ynext, x, pref); // rank of x in ynext's pref list
             for (int j=rx+1; j<=last[ynext]; j++) {
                 if (possible[ynext][j]) {
-                    possible[ynext][j] = false;  // <-- TODO unnecessary, I think.
+                    //possible[ynext][j] = false;  // <-- TODO unnecessary, I think.
                     
                     // delete ynext from pref list of pref[ynext][j]
                     int k = pref[ynext][j];
@@ -328,7 +315,7 @@ int normal_run(std::string filename, bool verbose) {
     read_time = double(clock() - start_time)/CLOCKS_PER_SEC;
 
     shrink_start_time = clock();
-    srSat.shrink();
+    srSat.phase1();
     shrink_time = double(clock() - shrink_start_time)/CLOCKS_PER_SEC;
 
     if (verbose) srSat.show();
@@ -341,7 +328,7 @@ int normal_run(std::string filename, bool verbose) {
 
     std::cout << "Result:       " << (is_stable ? "STABLE" : "UNSTABLE") << std::endl;
     std::cout << "Read time:    " << read_time << std::endl;
-    std::cout << "Shrink time:  " << shrink_time << std::endl;
+    std::cout << "Phase 1 time:  " << shrink_time << std::endl;
     std::cout << "Phase 2 time: " << solve_time << std::endl;
     std::cout << "Total time:   " << total_time << std::endl;
 
@@ -356,7 +343,6 @@ int random_run(double timeout, unsigned int n, double p, unsigned int seed) {
     if (p > 1) {
         std::cout << n << "\t" << p << "\t" << 0 << "\t" << 
                     -1 << "\t" << seed << std::endl;
-
         return 0;
     }
 
@@ -367,17 +353,11 @@ int random_run(double timeout, unsigned int n, double p, unsigned int seed) {
     rgen.seed(seed);
     while (true) {
         SRSat<RankLookupType> srSat;
-
         srSat.create(generate(n, p, rgen));
-
-        srSat.shrink();
-
+        srSat.phase1();
         num_instances++;
-
         bool is_stable = srSat.phase2();
-
         if (is_stable) stable_count++;
-
         if (double(clock() - start_time)/CLOCKS_PER_SEC > timeout) break;
     }
 
