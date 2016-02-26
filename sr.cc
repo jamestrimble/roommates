@@ -162,10 +162,8 @@ void SRSat<RankLookupType>::phase1() {
             k = rank_lookup.get_rank(j, i, pref);
         }
 
-        if (prop_from[j] != -1) {
-            int proposer = prop_from[j];
-            q.push(proposer);
-        }
+        if (prop_from[j] != -1)
+            q.push(prop_from[j]);   // old proposer is freed; add him to queue
 
         prop_from[j] = i;
 
@@ -175,11 +173,9 @@ void SRSat<RankLookupType>::phase1() {
     std::vector<std::vector<int> > shrunk_pref;
 
     for (int i=0; i<n; i++) {
-        int j;   // other agent
         shrunk_pref.push_back(std::vector<int>());
         for (int l=first[i]; l<length[i]; l++) {
-            j=pref[i][l];
-
+            int j=pref[i][l];
             if (rank_lookup.get_rank(j, i, pref) < length[j])
                 shrunk_pref[i].push_back(j);
         }
@@ -207,6 +203,8 @@ std::vector<int> SRSat<RankLookupType>::find_rotation(
     // x is the current x agent in the walk
 
     std::vector<int> walk;
+    // first_pos_in_walk[i] is the first position in the walk at which i
+    // appears, or -1 if i does not appear in the walk.
     std::vector<int> first_pos_in_walk(n, -1);
     
     while (first_pos_in_walk[x] == -1) {
@@ -216,23 +214,21 @@ std::vector<int> SRSat<RankLookupType>::find_rotation(
         x = pref[y][last[y]];
     }
 
-    std::vector<int> rotation(walk.begin() + first_pos_in_walk[x], walk.end());
-
-    return rotation;
+    // return the rotation (the walk without the tail)
+    return std::vector<int>(walk.begin() + first_pos_in_walk[x], walk.end());
 }
 
 template<class RankLookupType>
 bool SRSat<RankLookupType>::phase2() {
-
-    // Can agent i be matched with his jth preference?
+    // possible[i] == true <-> agent i can be matched with his jth preference
     std::vector<std::vector<bool> > possible;
+    for (int i=0; i<n; i++) possible.push_back(std::vector<bool>(length[i], true));
+
     int first_with_at_least_2 = n; // First agent with at least 2 possible agents on pref list
-    for (int i=0; i<n; i++)
-        possible.push_back(std::vector<bool>(length[i], true));
 
     // fst[i] is the position in i's list of i's first preference.
     // snd[i] is the position in i's list of i's second preference.
-    // These are -1 if no such element exists.
+    // last[i] is the position in i's list of i's last preference.
     std::vector<int> fst(n);
     std::vector<int> snd(n, 1);
     std::vector<int> last(n);
@@ -284,6 +280,7 @@ bool SRSat<RankLookupType>::phase2() {
             last[ynext] = rx;
         }
 
+        // Update our 'pointer' to the first agent with at least 2 remaining preferences
         while (fst[first_with_at_least_2] == last[first_with_at_least_2])
             first_with_at_least_2++;
     }
