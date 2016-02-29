@@ -182,8 +182,8 @@ void SRSat<RankLookupType>::phase1() {
         shrunk_pref[i].push_back(i);
     }
 
+    rank_lookup.clear();
     for (int i=0; i<n; i++) {
-        rank_lookup.clear(i);
         for (std::vector<int>::size_type k=0; k<shrunk_pref[i].size(); k++)
             rank_lookup.set_rank(i, shrunk_pref[i][k], k);
 
