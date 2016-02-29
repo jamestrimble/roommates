@@ -40,6 +40,8 @@ private:
 };
 
 
+// TODO: If max pref list length is below the max value of uint16_t, it's faster
+// to use uint16_t values in this array
 class RankLookupArray {
 public:
     inline void set_rank(int i, int j, int rank) { this->rank[i][j] = rank; }
