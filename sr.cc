@@ -368,7 +368,7 @@ int random_run(double timeout, unsigned int n, double p, unsigned int seed) {
 int main(int argc, char** argv) {
     double timeout = -1;
     unsigned int n = 100;
-    double p;
+    double p, np;
     unsigned int seed;
     int type;
     bool verbose;
@@ -381,7 +381,8 @@ int main(int argc, char** argv) {
             ("timeout", po::value<double>(&timeout)->default_value(5),
                     "the number of seconds after which to stop generating instances")
             ("n,n", po::value<unsigned int>(&n)->default_value(100), "number of agents")
-            ("p,p", po::value<double>(&p)->default_value(0), "p")
+            ("p,p", po::value<double>(&p)->default_value(0.5), "p (use --p or --np, not both)")
+            ("np", po::value<double>(&np), "n*p (use --p or --np, not both)")
             ("seed,s", po::value<unsigned int>(&seed)->default_value(1),
                     "seed for random generator")
             ("type", po::value<int>(&type)->default_value(1),
@@ -398,6 +399,15 @@ int main(int argc, char** argv) {
             std::cout << "Invalid type." << std::endl << desc << std::endl;
             return 1;
         }
+
+        if (vm.count("np")) {
+            p = np / n;
+        }
+        if (p < 0 || p > 1) {
+            std::cout << "Invalid value for p." << std::endl << desc << std::endl;
+            return 1;
+        }
+        
         if (vm.count("help") || !(vm.count("file") || vm.count("random"))) {
             std::cout << desc << "\n";
             return 1;
