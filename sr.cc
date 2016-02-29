@@ -90,9 +90,7 @@ void SRSat<RankLookupType>::create(std::vector<std::vector<int> > instance) {
 
     rank_lookup.initialise(n);
 
-    for (int i=0; i<n; i++) {
-        pref.push_back(instance[i]);
-    }
+    pref = instance;   // TODO: avoid copying the instance
 
     for (int i=0; i<n; i++) {
         length.push_back(instance[i].size());
