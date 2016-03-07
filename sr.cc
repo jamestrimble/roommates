@@ -26,7 +26,7 @@ public:
     void show();
     bool phase2();
     void build_sat();
-    void solve_sat();  // Find all solutions
+    unsigned int solve_sat(bool display_sols);  // Find all solutions, and return count
     std::vector<int> find_rotation(std::vector<int>& fst, std::vector<int>& snd,
             std::vector<int>& last, int x);
     SRSat();
@@ -440,12 +440,13 @@ void SRSat<RankLookupType>::displayMatching() {
 }
 
 template<class RankLookupType>
-void SRSat<RankLookupType>::solve_sat() {
-    int n_solutions = 0;
+unsigned int SRSat<RankLookupType>::solve_sat(bool display_sols) {
+    // Return value: number of stable solutions
+    unsigned int n_solutions = 0;
 
     vec<Lit> newClause;
     while (s.solve()) {
-        displayMatching();
+        if (display_sols) displayMatching();
         n_solutions++;
 
         // Create a new clause to rule out found solution
@@ -458,13 +459,9 @@ void SRSat<RankLookupType>::solve_sat() {
         }
 
         s.addClause(newClause);
-        //if (!s.addClause(newClause)) std::cout << "failed to add clause";
     }
 
-    if (n_solutions)
-        std::cout << "STABLE " << n_solutions << std::endl;
-    else
-        std::cout << "UNSTABLE" << std::endl;
+    return n_solutions;
 }
 
 
@@ -475,7 +472,7 @@ void SRSat<RankLookupType>::solve_sat() {
 
 
 template<class RankLookupType>
-int normal_run(std::string filename, bool verbose) {
+int normal_run(std::string filename, bool verbose, bool all_sols) {
     clock_t start_time;
     clock_t shrink_start_time;
     clock_t solve_start_time;
@@ -502,12 +499,12 @@ int normal_run(std::string filename, bool verbose) {
     solve_start_time = clock();
     bool is_stable = srSat.phase2();
 
-    std::cout << "a" << std::endl;
-    if (is_stable)  {
+    if (all_sols && is_stable)  {
         srSat.build_sat();
-        srSat.solve_sat();
+        unsigned int n_sols = srSat.solve_sat(true);
+        if (n_sols)
+            std::cout << n_sols << "\tstable solutions found" << std::endl;
     }
-    std::cout << "b" << std::endl;
 
     solve_time = double(clock() - solve_start_time)/CLOCKS_PER_SEC;
    
@@ -523,7 +520,7 @@ int normal_run(std::string filename, bool verbose) {
 }
 
 template<class RankLookupType>
-int random_run(double timeout, unsigned int n, double p, unsigned int seed) {
+int random_run(double timeout, unsigned int n, double p, unsigned int seed, bool all_sols) {
 
     std::ios_base::sync_with_stdio(false);
 
@@ -538,6 +535,12 @@ int random_run(double timeout, unsigned int n, double p, unsigned int seed) {
     clock_t start_time = clock();
     std::mt19937_64 rgen;
     rgen.seed(seed);
+
+    // A map with stable solution count as key and number of instances
+    // with this number of stable sols as value
+    // This map is only used if all_sols is true
+    std::map<unsigned int, unsigned int> sol_count_map;
+
     while (true) {
         SRSat<RankLookupType> srSat;
         srSat.create(generate(n, p, rgen));
@@ -545,9 +548,21 @@ int random_run(double timeout, unsigned int n, double p, unsigned int seed) {
         num_instances++;
         bool is_stable = srSat.phase2();
         if (is_stable) stable_count++;
+        if (all_sols && is_stable)  {
+            srSat.build_sat();
+            unsigned int n_sols = srSat.solve_sat(false);
+            if (sol_count_map.count(n_sols))
+                ++sol_count_map[n_sols];
+            else
+                sol_count_map[n_sols] = 1;
+        }
         if (double(clock() - start_time)/CLOCKS_PER_SEC > timeout) break;
     }
 
+    if (all_sols)
+        for (auto it : sol_count_map)
+            std::cout << it.first << "\t" << it.second << std::endl;
+    
     double proportion_stable = (double)stable_count / (double)num_instances;
     std::cout << n << "\t" << p << "\t" << num_instances << "\t" << 
                 proportion_stable << "\t" << seed << std::endl;
@@ -562,6 +577,7 @@ int main(int argc, char** argv) {
     unsigned int seed;
     int type;
     bool verbose;
+    bool all_sols;  // find all solutions, or just check whether stable?
     try {
         po::options_description desc("Allowed options");
         desc.add_options()
@@ -579,6 +595,8 @@ int main(int argc, char** argv) {
                     "1=array, 2=map, 3=linear scan")
             ("verbose,v", po::bool_switch(&verbose),
                     "Display verbose output (this is not fully implemented yet)")
+            ("all,a", po::bool_switch(&all_sols),
+                    "Find all solutions? (Default: just check whether a stable solution exists)")
             ;
 
         po::variables_map vm;
@@ -604,15 +622,15 @@ int main(int argc, char** argv) {
         } else if (vm.count("file")) {
             std::string filename = vm["file"].as<std::string>();
             switch (type) {
-                case 1: return normal_run<RankLookupArray>(filename, verbose);
-                case 2: return normal_run<RankLookupMap>(filename, verbose);
-                case 3: return normal_run<RankLookupLinearScan>(filename, verbose);
+                case 1: return normal_run<RankLookupArray>(filename, verbose, all_sols);
+                case 2: return normal_run<RankLookupMap>(filename, verbose, all_sols);
+                case 3: return normal_run<RankLookupLinearScan>(filename, verbose, all_sols);
             }
         } else if (vm.count("random")) {
             switch (type) {
-                case 1: return random_run<RankLookupArray>(timeout, n, p, seed);
-                case 2: return random_run<RankLookupMap>(timeout, n, p, seed);
-                case 3: return random_run<RankLookupLinearScan>(timeout, n, p, seed);
+                case 1: return random_run<RankLookupArray>(timeout, n, p, seed, all_sols);
+                case 2: return random_run<RankLookupMap>(timeout, n, p, seed, all_sols);
+                case 3: return random_run<RankLookupLinearScan>(timeout, n, p, seed, all_sols);
 
             }
         }
