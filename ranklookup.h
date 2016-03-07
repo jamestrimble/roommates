@@ -15,9 +15,6 @@ public:
         //        return k;
         //return -1; // should never be reached
     }
-    inline int get_rank_upto(int i, int j, vector<vector<int> >& pref, int upto) {
-        return get_rank(i, j, pref);
-    }
     void initialise(int n) {};
     void reserve_space(int i, int size) {};
     void clear() {};
@@ -30,9 +27,6 @@ public:
     inline void set_rank(int i, int j, int rank) { this->rank[i][j] = rank; }
     inline int get_rank(int i, int j, vector<vector<int> >& pref) {
         return rank[i][j];
-    }
-    inline int get_rank_upto(int i, int j, vector<vector<int> >& pref, int upto) {
-        return get_rank(i, j, pref);
     }
     void initialise(int n) {
         for (int i=0; i<n; i++)
@@ -56,9 +50,6 @@ public:
     inline void set_rank(int i, int j, int rank) { this->rank[i][j] = rank; }
     inline int get_rank(int i, int j, vector<vector<int> >& pref) {
         return rank[i][j];
-    }
-    inline int get_rank_upto(int i, int j, vector<vector<int> >& pref, int upto) {
-        return get_rank(i, j, pref);
     }
     void initialise(int n) {
         rank = new int*[n];
