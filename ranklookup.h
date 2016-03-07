@@ -7,10 +7,16 @@ class RankLookupLinearScan {
 public:
     inline void set_rank(int i, int j, int rank) {};
     inline int get_rank(int i, int j, vector<vector<int> >& pref) {
-        for (vector<vector<int> >::size_type k=0; k<pref[i].size(); k++)
-            if (pref[i][k]==j)
-                return k;
-        return -1; // should never be reached
+        vector<vector<int> >::size_type k=0;
+        while (pref[i][k] != j) k++;
+        return k;
+        //for (vector<vector<int> >::size_type k=0; k<pref[i].size(); k++)
+        //    if (pref[i][k]==j)
+        //        return k;
+        //return -1; // should never be reached
+    }
+    inline int get_rank_upto(int i, int j, vector<vector<int> >& pref, int upto) {
+        return get_rank(i, j, pref);
     }
     void initialise(int n) {};
     void reserve_space(int i, int size) {};
@@ -24,6 +30,9 @@ public:
     inline void set_rank(int i, int j, int rank) { this->rank[i][j] = rank; }
     inline int get_rank(int i, int j, vector<vector<int> >& pref) {
         return rank[i][j];
+    }
+    inline int get_rank_upto(int i, int j, vector<vector<int> >& pref, int upto) {
+        return get_rank(i, j, pref);
     }
     void initialise(int n) {
         for (int i=0; i<n; i++)
@@ -47,6 +56,9 @@ public:
     inline void set_rank(int i, int j, int rank) { this->rank[i][j] = rank; }
     inline int get_rank(int i, int j, vector<vector<int> >& pref) {
         return rank[i][j];
+    }
+    inline int get_rank_upto(int i, int j, vector<vector<int> >& pref, int upto) {
+        return get_rank(i, j, pref);
     }
     void initialise(int n) {
         rank = new int*[n];
