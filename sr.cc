@@ -521,7 +521,7 @@ int normal_run(std::string filename, bool verbose, bool all_sols) {
 }
 
 template<class RankLookupType>
-int random_run(double timeout, unsigned int n, double p, unsigned int seed, bool all_sols, bool smmorph) {
+int random_run(double timeout, int max_iter, unsigned int n, double p, unsigned int seed, bool all_sols, bool smmorph) {
 
     std::ios_base::sync_with_stdio(false);
 
@@ -557,7 +557,7 @@ int random_run(double timeout, unsigned int n, double p, unsigned int seed, bool
             else
                 sol_count_map[n_sols] = 1;
         }
-        if (double(clock() - start_time)/CLOCKS_PER_SEC > timeout) break;
+        if ((max_iter!=-1 && num_instances==max_iter) || double(clock() - start_time)/CLOCKS_PER_SEC > timeout) break;
     }
 
     if (all_sols)
@@ -577,6 +577,7 @@ int main(int argc, char** argv) {
     double p, np;
     unsigned int seed;
     int type;
+    int max_iter;
     bool verbose;
     bool all_sols;  // find all solutions, or just check whether stable?
     bool smmorph;
@@ -586,6 +587,7 @@ int main(int argc, char** argv) {
             ("help,h", "show help message")
             ("file,f", po::value<std::string>(), "read the specified file")
             ("random,r", "create a random instance")
+            ("maxiter", po::value<int>(&max_iter)->default_value(-1), "maximum number of random runs")
             ("timeout", po::value<double>(&timeout)->default_value(5),
                     "the number of seconds after which to stop generating instances")
             ("n,n", po::value<unsigned int>(&n)->default_value(100), "number of agents")
@@ -632,9 +634,9 @@ int main(int argc, char** argv) {
             }
         } else if (vm.count("random")) {
             switch (type) {
-                case 1: return random_run<RankLookupArray>(timeout, n, p, seed, all_sols, smmorph);
-                case 2: return random_run<RankLookupMap>(timeout, n, p, seed, all_sols, smmorph);
-                case 3: return random_run<RankLookupLinearScan>(timeout, n, p, seed, all_sols, smmorph);
+                case 1: return random_run<RankLookupArray>(timeout, max_iter, n, p, seed, all_sols, smmorph);
+                case 2: return random_run<RankLookupMap>(timeout, max_iter, n, p, seed, all_sols, smmorph);
+                case 3: return random_run<RankLookupLinearScan>(timeout, max_iter, n, p, seed, all_sols, smmorph);
 
             }
         }
