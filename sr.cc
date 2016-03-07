@@ -541,6 +541,7 @@ int random_run(double timeout, int max_iter, unsigned int n, double p, unsigned 
     // with this number of stable sols as value
     // This map is only used if all_sols is true
     std::map<unsigned int, unsigned int> sol_count_map;
+    if (all_sols) sol_count_map[0] = 0;
 
     while (true) {
         SRSat<RankLookupType> srSat;
@@ -549,13 +550,17 @@ int random_run(double timeout, int max_iter, unsigned int n, double p, unsigned 
         num_instances++;
         bool is_stable = srSat.phase2();
         if (is_stable) stable_count++;
-        if (all_sols && is_stable)  {
-            srSat.build_sat();
-            unsigned int n_sols = srSat.solve_sat(false);
-            if (sol_count_map.count(n_sols))
-                ++sol_count_map[n_sols];
-            else
-                sol_count_map[n_sols] = 1;
+        if (all_sols)  {
+            if (is_stable) {
+                srSat.build_sat();
+                unsigned int n_sols = srSat.solve_sat(false);
+                if (sol_count_map.count(n_sols))
+                    ++sol_count_map[n_sols];
+                else
+                    sol_count_map[n_sols] = 1;
+            } else {
+                ++sol_count_map[0];
+            }
         }
         if ((max_iter!=-1 && num_instances==max_iter) || double(clock() - start_time)/CLOCKS_PER_SEC > timeout) break;
     }
