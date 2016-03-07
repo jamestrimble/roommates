@@ -1,5 +1,6 @@
 #include "generator/generator.h"
 #include "ranklookup.h"
+#include "Solver.h"
 #include <cmath>
 #include <ctime>
 #include <fstream>
@@ -13,6 +14,7 @@
 
 #include <boost/program_options.hpp>
 
+using namespace Minisat;
 namespace po = boost::program_options;
 
 template <class RankLookupType>
@@ -23,6 +25,8 @@ public:
     void phase1();
     void show();
     bool phase2();
+    void build_sat();
+    void solve_sat();  // Find all solutions
     std::vector<int> find_rotation(std::vector<int>& fst, std::vector<int>& snd,
             std::vector<int>& last, int x);
     SRSat();
@@ -30,14 +34,29 @@ public:
 
 private:
     RankLookupType rank_lookup;
+    vec<Lit> lits;  // SAT literals
     int n;   // number of agents
     std::vector<std::vector<int> > pref; // Same as in Patrick's SR.java:
                 // pref[i][k] = j <-> agent_i has agent_j as k^th choice
     std::vector<int> length; // length of agent's preference list
+    Solver s;   // MiniSat solver
+
+    // --- MiniSat variables ---
+    // assigned[i][j] <-> agent_i gets her j^th choice
+    std::vector<std::vector<Lit> > assigned;
+    // MiniSat variables are just integers. Keep track of the next one to be created.
+    int n_vars;
+    // Create a new variable
+    inline Lit createLit();
+    // Create an implies constraint
+    inline void implies(Lit a, Lit b) {s.addClause(~a, b);}
+    void displayMatching();
 };
 
 template<class RankLookupType>
-SRSat<RankLookupType>::SRSat() {
+SRSat<RankLookupType>::SRSat(): n_vars(0) {
+    s.ccmin_mode = 0;
+    s.phase_saving = 0;
 }
 
 template<class RankLookupType>
@@ -290,6 +309,171 @@ bool SRSat<RankLookupType>::phase2() {
 ////////  End of Phase 2
 ///////////////////////////////////////////
 
+
+///////////////////////////////////////////
+////////  SAT stuff to find all solutions after phase 1
+///////////////////////////////////////////
+
+/*
+ * Creates a literal representing a new MiniSat variable
+ */
+template<class RankLookupType>
+Lit SRSat<RankLookupType>::createLit() {
+    Lit lit = mkLit(s.newVar());
+    lits.push(lit);
+    n_vars++;
+    return lit;
+}
+
+/*
+ * Builds the SAT instance
+ */
+template<class RankLookupType>
+void SRSat<RankLookupType>::build_sat() {
+    for (int i=0; i<n; i++) {
+        assigned.push_back(std::vector<Lit>(length[i]+1, mkLit(0)));
+    }
+    std::vector<std::vector<Lit> > assignedBelow(n, std::vector<Lit>());
+    std::vector<std::vector<Lit> > assignedAbove(n, std::vector<Lit>());
+
+    //Lit* assignedBlock = new Lit[n*n];
+    //for (int i=0; i<n; i++) {
+    //    assigned[i] = assignedBlock + i*n;
+    //}
+
+    // For each agent A, create a variable which is true iff A
+    // is unassigned
+    for (int i=0; i<n; i++) {
+        assigned[i][length[i]] = createLit();       
+    }
+
+    for (int i=0; i<n; i++) {
+        // For each agent A, create a variable for each position in A's preference
+        // list which is true iff A gets better than her j^th choice. Similarly,
+        // create variables which are true iff A gets worse than her j^th choice.
+        for (int j=0; j<=length[i]; j++) {
+            assignedBelow[i].push_back(createLit());
+            assignedAbove[i].push_back(createLit());
+        }
+    }
+
+    // Create variables, each of which is true iff agent is is matched with
+    // agent k. Do this only if i<k. Below, we will re-use these variables for the
+    // case where i>k.
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<length[i]; j++) {
+            int k = pref[i][j];
+            if (i<k) assigned[i][j] = createLit();
+        }
+    }
+
+    // Use the same variable for agent A being matched with agent B as for agent B
+    // being matched with agent A.
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<length[i]; j++) {
+            int k = pref[i][j];
+            if (i>k) assigned[i][j] = assigned[k][rank_lookup.get_rank(k, i, pref)];
+        }
+    }
+
+    for (int i=0; i<n; i++) {
+        // Constraint: For each agent A, either A is unmatched (second term), or
+        // is matched to someone else (second term)
+        s.addClause(assignedBelow[i][length[i]], assigned[i][length[i]]);
+    }
+
+    for (int i=0; i<n; i++) {
+        // Each agent can't do worse than being assigned to herself
+        s.addClause(~assignedAbove[i][length[i]]);
+        // Each agent can't do better than her first preference
+        s.addClause(~assignedBelow[i][0]);
+    }
+
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<length[i]; j++) {
+            int k = pref[i][j];
+            // Equivalent to the following constraint in SR.java:
+            // implies(gt(agent[i],rank[i][k]),lt(agent[k],rank[k][i]))
+            implies(assignedAbove[i][rank_lookup.get_rank(i, k, pref)],
+                    assignedBelow[k][rank_lookup.get_rank(k, i, pref)]);
+
+            // It isn't necessary to have as many variables and
+            // constraints as below, but this system seems to work
+            // quite well. I haven't yet tested a version similar
+            // to the model of Prosser and Gent for stable marriage
+
+            // assignedAbove[i][j+1] implies assignedAbove[i][j]
+            implies(assignedAbove[i][j+1], assignedAbove[i][j]);
+            // assigned[i][j+1] implies assignedAbove[i][j]
+            implies(assigned[i][j+1], assignedAbove[i][j]);
+            // Agent i can't be assigned to her j^th preference and also
+            // assigned to someone worse than her j^th preference
+            implies(assignedAbove[i][j], ~assigned[i][j]);
+            // If agent i is assigned to worse than her j^th preference,
+            // then either she is assigned to her (j+1)^th preference or
+            // she is assigned to worse than her (j+1)^th preference
+            s.addClause(~assignedAbove[i][j],
+                        assigned[i][j+1],
+                        assignedAbove[i][j+1]);
+
+            implies(assignedBelow[i][j], assignedBelow[i][j+1]);
+            implies(assigned[i][j], assignedBelow[i][j+1]);
+            implies(assignedBelow[i][j+1], ~assigned[i][j+1]);
+            s.addClause(~assignedBelow[i][j+1],
+                        assigned[i][j],
+                        assignedBelow[i][j]);
+        }
+    }
+}
+
+template<class RankLookupType>
+void SRSat<RankLookupType>::displayMatching() {
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<length[i]; j++) {
+            int k = pref[i][j];
+            if (i<k && s.modelValue(assigned[i][j]) == l_True) {
+                std::cout << "(" << i+1 << "," << k+1 << ") ";
+            }
+        }
+    }
+    std::cout << std::endl;
+}
+
+template<class RankLookupType>
+void SRSat<RankLookupType>::solve_sat() {
+    int n_solutions = 0;
+
+    vec<Lit> newClause;
+    while (s.solve()) {
+        displayMatching();
+        n_solutions++;
+
+        // Create a new clause to rule out found solution
+        newClause.clear();
+        for (int i=0; i<lits.size(); i++) {
+            if (s.modelValue(lits[i])!=l_True)
+                newClause.push(lits[i]);
+            else
+                newClause.push(~lits[i]);
+        }
+
+        s.addClause(newClause);
+        //if (!s.addClause(newClause)) std::cout << "failed to add clause";
+    }
+
+    if (n_solutions)
+        std::cout << "STABLE " << n_solutions << std::endl;
+    else
+        std::cout << "UNSTABLE" << std::endl;
+}
+
+
+
+///////////////////////////////////////////
+////////  End of SAT stuff to find all solutions after phase 1
+///////////////////////////////////////////
+
+
 template<class RankLookupType>
 int normal_run(std::string filename, bool verbose) {
     clock_t start_time;
@@ -317,6 +501,14 @@ int normal_run(std::string filename, bool verbose) {
 
     solve_start_time = clock();
     bool is_stable = srSat.phase2();
+
+    std::cout << "a" << std::endl;
+    if (is_stable)  {
+        srSat.build_sat();
+        srSat.solve_sat();
+    }
+    std::cout << "b" << std::endl;
+
     solve_time = double(clock() - solve_start_time)/CLOCKS_PER_SEC;
    
     total_time = double(clock() - start_time)/CLOCKS_PER_SEC;
