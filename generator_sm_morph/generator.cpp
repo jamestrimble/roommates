@@ -47,7 +47,7 @@ std::vector<std::vector<int> > generate_morph(unsigned int n, double p, std::mt1
     std::vector<std::pair<int, int> > E2minusEx_edges;
     for (int i=0; i<n-1; i++) {
         for (int j=i+1; j<n; j++) {
-            if (E1minusEx[i*n + j]) {E1minusEx_edges.push_back(std::pair<int, int>(i, j));std::cout << i << j << std::endl;}
+            if (E1minusEx[i*n + j]) E1minusEx_edges.push_back(std::pair<int, int>(i, j));
             if (E2minusEx[i*n + j]) E2minusEx_edges.push_back(std::pair<int, int>(i, j));
         }
     }

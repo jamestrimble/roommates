@@ -1,4 +1,5 @@
 #include "generator/generator.h"
+#include "generator_sm_morph/generator.h"
 #include "ranklookup.h"
 #include "Solver.h"
 #include <cmath>
@@ -520,7 +521,7 @@ int normal_run(std::string filename, bool verbose, bool all_sols) {
 }
 
 template<class RankLookupType>
-int random_run(double timeout, unsigned int n, double p, unsigned int seed, bool all_sols) {
+int random_run(double timeout, unsigned int n, double p, unsigned int seed, bool all_sols, bool smmorph) {
 
     std::ios_base::sync_with_stdio(false);
 
@@ -543,7 +544,7 @@ int random_run(double timeout, unsigned int n, double p, unsigned int seed, bool
 
     while (true) {
         SRSat<RankLookupType> srSat;
-        srSat.create(generate(n, p, rgen));
+        srSat.create(smmorph ? generate_morph(n, p, rgen) : generate(n, p, rgen));
         srSat.phase1();
         num_instances++;
         bool is_stable = srSat.phase2();
@@ -578,6 +579,7 @@ int main(int argc, char** argv) {
     int type;
     bool verbose;
     bool all_sols;  // find all solutions, or just check whether stable?
+    bool smmorph;
     try {
         po::options_description desc("Allowed options");
         desc.add_options()
@@ -597,6 +599,8 @@ int main(int argc, char** argv) {
                     "Display verbose output (this is not fully implemented yet)")
             ("all,a", po::bool_switch(&all_sols),
                     "Find all solutions? (Default: just check whether a stable solution exists)")
+            ("smmorph", po::bool_switch(&smmorph),
+                    "Use SM morph generator?")
             ;
 
         po::variables_map vm;
@@ -628,9 +632,9 @@ int main(int argc, char** argv) {
             }
         } else if (vm.count("random")) {
             switch (type) {
-                case 1: return random_run<RankLookupArray>(timeout, n, p, seed, all_sols);
-                case 2: return random_run<RankLookupMap>(timeout, n, p, seed, all_sols);
-                case 3: return random_run<RankLookupLinearScan>(timeout, n, p, seed, all_sols);
+                case 1: return random_run<RankLookupArray>(timeout, n, p, seed, all_sols, smmorph);
+                case 2: return random_run<RankLookupMap>(timeout, n, p, seed, all_sols, smmorph);
+                case 3: return random_run<RankLookupLinearScan>(timeout, n, p, seed, all_sols, smmorph);
 
             }
         }
