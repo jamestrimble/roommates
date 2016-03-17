@@ -8,6 +8,7 @@
 #include <iostream>
 #include <map>
 #include <random>
+#include <stdexcept>
 #include <string>
 #include <sstream>
 #include <queue>
@@ -17,6 +18,12 @@
 
 using namespace Minisat;
 namespace po = boost::program_options;
+
+struct SolvingError: public std::runtime_error {
+    SolvingError(std::string const& message)
+        : std::runtime_error(message)
+    {}
+};
 
 template <class RankLookupType>
 class SRSat {
@@ -28,6 +35,7 @@ public:
     bool phase2();
     void build_sat();
     unsigned int solve_sat(bool display_sols);  // Find all solutions, and return count
+    bool is_sat();
     std::vector<int> find_rotation(std::vector<int>& fst, std::vector<int>& snd,
             std::vector<int>& last, int x);
     SRSat();
@@ -312,7 +320,7 @@ bool SRSat<RankLookupType>::phase2() {
 
 
 ///////////////////////////////////////////
-////////  SAT stuff to find all solutions after phase 1
+////////  SAT stuff
 ///////////////////////////////////////////
 
 /*
@@ -465,10 +473,14 @@ unsigned int SRSat<RankLookupType>::solve_sat(bool display_sols) {
     return n_solutions;
 }
 
+template<class RankLookupType>
+bool SRSat<RankLookupType>::is_sat() {
+    return s.solve();
+}
 
 
 ///////////////////////////////////////////
-////////  End of SAT stuff to find all solutions after phase 1
+////////  End of SAT stuff
 ///////////////////////////////////////////
 
 
@@ -500,7 +512,7 @@ int normal_run(std::string filename, bool verbose, bool all_sols) {
     solve_start_time = clock();
     bool is_stable = srSat.phase2();
 
-    if (all_sols && is_stable)  {
+    if (all_sols && is_stable) {
         srSat.build_sat();
         unsigned int n_sols = srSat.solve_sat(true);
         if (n_sols)
@@ -521,7 +533,8 @@ int normal_run(std::string filename, bool verbose, bool all_sols) {
 }
 
 template<class RankLookupType>
-int random_run(double timeout, int max_iter, unsigned int n, double p, unsigned int seed, bool all_sols, bool smmorph) {
+int random_run(double timeout, int max_iter, unsigned int n, double p, unsigned int seed, bool all_sols,
+               bool smmorph, bool use_phase_1) {
 
     std::ios_base::sync_with_stdio(false);
 
@@ -546,21 +559,21 @@ int random_run(double timeout, int max_iter, unsigned int n, double p, unsigned 
     while (true) {
         SRSat<RankLookupType> srSat;
         srSat.create(smmorph ? generate_morph(n, p, rgen) : generate(n, p, rgen));
-        srSat.phase1();
+        if (use_phase_1) srSat.phase1();
         num_instances++;
-        bool is_stable = srSat.phase2();
-        if (is_stable) stable_count++;
+        srSat.build_sat();
         if (all_sols)  {
-            if (is_stable) {
-                srSat.build_sat();
-                unsigned int n_sols = srSat.solve_sat(false);
-                if (sol_count_map.count(n_sols))
-                    ++sol_count_map[n_sols];
-                else
-                    sol_count_map[n_sols] = 1;
-            } else {
-                ++sol_count_map[0];
-            }
+            unsigned int n_sols = srSat.solve_sat(false);
+            if (sol_count_map.count(n_sols))
+                ++sol_count_map[n_sols];
+            else
+                sol_count_map[n_sols] = 1;
+            if (use_phase_1 && (n_sols==0) == srSat.phase2()) throw SolvingError("Solvers disagree!");
+        } else {
+            bool is_stable = srSat.is_sat();
+            if (is_stable) stable_count++;
+            // Double-check correctness
+            if (use_phase_1 && is_stable != srSat.phase2()) throw SolvingError("Solvers disagree!");
         }
         if ((max_iter!=-1 && num_instances==max_iter) || double(clock() - start_time)/CLOCKS_PER_SEC > timeout) break;
     }
@@ -586,6 +599,7 @@ int main(int argc, char** argv) {
     bool verbose;
     bool all_sols;  // find all solutions, or just check whether stable?
     bool smmorph;
+    bool no_phase_1;
     try {
         po::options_description desc("Allowed options");
         desc.add_options()
@@ -608,6 +622,8 @@ int main(int argc, char** argv) {
                     "Find all solutions? (Default: just check whether a stable solution exists)")
             ("smmorph", po::bool_switch(&smmorph),
                     "Use SM morph generator?")
+            ("no-phase-1", po::bool_switch(&no_phase_1),
+                    "Don't carry out phase 1? (Uses SAT solver only) (Ignored if input is from file)")
             ;
 
         po::variables_map vm;
@@ -639,13 +655,16 @@ int main(int argc, char** argv) {
             }
         } else if (vm.count("random")) {
             switch (type) {
-                case 1: return random_run<RankLookupArray>(timeout, max_iter, n, p, seed, all_sols, smmorph);
-                case 2: return random_run<RankLookupMap>(timeout, max_iter, n, p, seed, all_sols, smmorph);
-                case 3: return random_run<RankLookupLinearScan>(timeout, max_iter, n, p, seed, all_sols, smmorph);
+                case 1: return random_run<RankLookupArray>(timeout, max_iter, n, p, seed, all_sols, smmorph, !no_phase_1);
+                case 2: return random_run<RankLookupMap>(timeout, max_iter, n, p, seed, all_sols, smmorph, !no_phase_1);
+                case 3: return random_run<RankLookupLinearScan>(timeout, max_iter, n, p, seed, all_sols, smmorph, !no_phase_1);
 
             }
         }
     } catch (po::error& e) {
+        std::cout << e.what() << std::endl;
+        return 1;
+    } catch (SolvingError& e) {
         std::cout << e.what() << std::endl;
         return 1;
     }
