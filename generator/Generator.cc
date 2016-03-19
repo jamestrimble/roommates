@@ -20,7 +20,7 @@ std::vector<std::vector<int> > GeneratorEdgeGeneration::generate() {
     int w = -1;
     double lp = std::log(1.0 - p);
 
-    unsigned int v = 1;
+    int v = 1;
     while (v < n) {
         double lr = std::log(1.0 - dis(rgen));
         if (p > 0.999999999)
@@ -81,7 +81,7 @@ std::vector<std::vector<int> > GeneratorEdgeGeneration::generate() {
 ///////////////////////////////////////////////////////////////
 
 inline int how_many_to_choose(double p,
-                     unsigned int t, // maximum possible number to choose
+                     int t, // maximum possible number to choose
                      std::mt19937_64& rgen) {
     std::binomial_distribution<int> binom_dist(t, p);
     return binom_dist(rgen);
@@ -118,7 +118,7 @@ std::vector<int> random_subset(int end, double p,
 
 std::vector<std::vector<int> > GeneratorEdgeGenerationBinom::generate() {
     std::vector<int> big_list;
-    for (unsigned int i=0; i<n; i++) {
+    for (int i=0; i<n; i++) {
         big_list.push_back(i);
     }
 
@@ -129,14 +129,14 @@ std::vector<std::vector<int> > GeneratorEdgeGenerationBinom::generate() {
     
     // for each agent i (i>0), find which agents j with j<i
     // i ranks
-    for (unsigned int i=1; i<n; i++) {
+    for (int i=1; i<n; i++) {
         pref_lists.push_back(random_subset(i, p, big_list, rgen));
         for (auto j : pref_lists[i]) {
             pref_lists[j].push_back(i);
         }
     }
 
-    for (unsigned int i=0; i<n; i++) {
+    for (int i=0; i<n; i++) {
         std::vector<int>& v = pref_lists[i];
         std::shuffle(v.begin(), v.end(), rgen);
     }
@@ -196,11 +196,11 @@ std::vector<std::vector<int> > GeneratorSMMorph::generate() {
 
     boost::dynamic_bitset<> chosen_edges = Ex;
 
-    int m1 = std::round(p * E1minusEx_edges.size());
+    unsigned int m1 = std::round(p * E1minusEx_edges.size());
     if (m1 > E1minusEx_edges.size()) m1 = E1minusEx_edges.size();
     shuffle_to_adjmat(E1minusEx_edges, chosen_edges, m1, n, rgen);
 
-    int m2 = std::round((1-p) * E2minusEx_edges.size());
+    unsigned int m2 = std::round((1-p) * E2minusEx_edges.size());
     if (m2 > E2minusEx_edges.size()) m2 = E2minusEx_edges.size();
     shuffle_to_adjmat(E2minusEx_edges, chosen_edges, m2, n, rgen);
 
@@ -216,7 +216,7 @@ std::vector<std::vector<int> > GeneratorSMMorph::generate() {
         }
     }
 
-    for (unsigned int i=0; i<n; i++) {
+    for (int i=0; i<n; i++) {
         std::vector<int>& v = pref_lists[i];
         std::shuffle(v.begin(), v.end(), rgen);
     }
@@ -243,7 +243,7 @@ std::vector<std::vector<int> > GeneratorEdgeSelection::generate() {
         pref_lists[w].push_back(v);
     }
 
-    for (unsigned int i=0; i<n; i++) {
+    for (int i=0; i<n; i++) {
         std::vector<int>& v = pref_lists[i];
         std::shuffle(v.begin(), v.end(), rgen);
     }

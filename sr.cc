@@ -33,7 +33,7 @@ public:
     void show();
     bool phase2();
     void build_sat();
-    unsigned int solve_sat(bool display_sols);  // Find all solutions, and return count
+    int solve_sat(bool display_sols);  // Find all solutions, and return count
     bool is_sat();
     std::vector<int> find_rotation(std::vector<int>& fst, std::vector<int>& snd,
             std::vector<int>& last, int x);
@@ -448,9 +448,9 @@ void SRSat<RankLookupType>::displayMatching() {
 }
 
 template<class RankLookupType>
-unsigned int SRSat<RankLookupType>::solve_sat(bool display_sols) {
+int SRSat<RankLookupType>::solve_sat(bool display_sols) {
     // Return value: number of stable solutions
-    unsigned int n_solutions = 0;
+    int n_solutions = 0;
 
     vec<Lit> newClause;
     while (s.solve()) {
@@ -513,7 +513,7 @@ int normal_run(std::string filename, bool verbose, bool all_sols) {
 
     if (all_sols && is_stable) {
         srSat.build_sat();
-        unsigned int n_sols = srSat.solve_sat(true);
+        int n_sols = srSat.solve_sat(true);
         if (n_sols)
             std::cout << n_sols << "\tstable solutions found" << std::endl;
     }
@@ -532,8 +532,8 @@ int normal_run(std::string filename, bool verbose, bool all_sols) {
 }
 
 template<class RankLookupType, class GeneratorType>
-int do_random_run(double timeout, int max_iter, unsigned int n, double p, bool all_sols,
-               std::mt19937_64& rgen, bool use_phase_1, unsigned int seed) {
+int do_random_run(double timeout, int max_iter, int n, double p, bool all_sols,
+               std::mt19937_64& rgen, bool use_phase_1, int seed) {
 
     std::ios_base::sync_with_stdio(false);
 
@@ -545,13 +545,13 @@ int do_random_run(double timeout, int max_iter, unsigned int n, double p, bool a
     auto gen = GeneratorType(n, p, rgen);
 
     int stable_count = 0;
-    unsigned int num_instances = 0;
+    int num_instances = 0;
     clock_t start_time = clock();
 
     // A map with stable solution count as key and number of instances
     // with this number of stable sols as value
     // This map is only used if all_sols is true
-    std::map<unsigned int, unsigned int> sol_count_map;
+    std::map<int, int> sol_count_map;
     if (all_sols) sol_count_map[0] = 0;
 
     while (true) {
@@ -561,7 +561,7 @@ int do_random_run(double timeout, int max_iter, unsigned int n, double p, bool a
         num_instances++;
         srSat.build_sat();
         if (all_sols)  {
-            unsigned int n_sols = srSat.solve_sat(false);
+            int n_sols = srSat.solve_sat(false);
             if (sol_count_map.count(n_sols))
                 ++sol_count_map[n_sols];
             else
@@ -588,8 +588,8 @@ int do_random_run(double timeout, int max_iter, unsigned int n, double p, bool a
 }
 
 template<class RankLookupType>
-int random_run(double timeout, int max_iter, unsigned int n, double p, bool all_sols,
-               std::mt19937_64& rgen, bool use_phase_1, unsigned int seed, int gen_type) {
+int random_run(double timeout, int max_iter, int n, double p, bool all_sols,
+               std::mt19937_64& rgen, bool use_phase_1, int seed, int gen_type) {
     switch(gen_type) {
     case 1:
         return do_random_run<RankLookupType, GeneratorEdgeGeneration>(timeout, max_iter, n, p, all_sols,
@@ -609,9 +609,9 @@ int random_run(double timeout, int max_iter, unsigned int n, double p, bool all_
 
 int main(int argc, char** argv) {
     double timeout = -1;
-    unsigned int n = 100;
+    int n = 100;
     double p, np;
-    unsigned int seed;
+    int seed;
     int type;
     int max_iter;
     bool verbose;
@@ -627,10 +627,10 @@ int main(int argc, char** argv) {
             ("maxiter", po::value<int>(&max_iter)->default_value(-1), "maximum number of random runs")
             ("timeout", po::value<double>(&timeout)->default_value(5),
                     "the number of seconds after which to stop generating instances")
-            ("n,n", po::value<unsigned int>(&n)->default_value(100), "number of agents")
+            ("n,n", po::value<int>(&n)->default_value(100), "number of agents")
             ("p,p", po::value<double>(&p)->default_value(0.5), "p (use --p or --np, not both)")
             ("np", po::value<double>(&np), "n*p (use --p or --np, not both)")
-            ("seed,s", po::value<unsigned int>(&seed)->default_value(1),
+            ("seed,s", po::value<int>(&seed)->default_value(1),
                     "seed for random generator")
             ("type", po::value<int>(&type)->default_value(1),
                     "1=array, 2=map, 3=linear scan")

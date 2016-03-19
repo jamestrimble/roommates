@@ -10,10 +10,10 @@ int main(int argc, char** argv) {
         std::cout << argv[0] << " n p gen_type seed" << std::endl;
         std::cout << "options for type: 1=edge gen, 2=edge gen (using binomial dist), 3=edge selection, 4=SR/SM morph" << std::endl;
     } else {
-        unsigned int n;
+        int n;
         double p;
         int gen_type;
-        unsigned int seed;
+        int seed;
 
         std::istringstream iss(argv[1]);
         iss >> n;
