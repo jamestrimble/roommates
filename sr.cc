@@ -590,6 +590,11 @@ int do_random_run(double timeout, int max_iter, int n, double p, bool all_sols,
 template<class RankLookupType>
 int random_run(double timeout, int max_iter, int n, double p, bool all_sols,
                std::mt19937_64& rgen, bool use_phase_1, int seed, int gen_type) {
+    if (gen_type == 7) {
+        if      (p == 1)  gen_type = 6;
+        else if (p > 0.7) gen_type = 3;
+        else              gen_type = 1;
+    }
     switch(gen_type) {
     case 1:
         return do_random_run<RankLookupType, GeneratorEdgeGeneration>(timeout, max_iter, n, p, all_sols,
@@ -598,10 +603,16 @@ int random_run(double timeout, int max_iter, int n, double p, bool all_sols,
         return do_random_run<RankLookupType, GeneratorEdgeGenerationBinom>(timeout, max_iter, n, p, all_sols,
                 rgen, use_phase_1, seed);
     case 3:
-        return do_random_run<RankLookupType, GeneratorEdgeSelection>(timeout, max_iter, n, p, all_sols,
+        return do_random_run<RankLookupType, GeneratorEdgeGenerationComplement>(timeout, max_iter, n, p, all_sols,
                 rgen, use_phase_1, seed);
     case 4:
+        return do_random_run<RankLookupType, GeneratorEdgeSelection>(timeout, max_iter, n, p, all_sols,
+                rgen, use_phase_1, seed);
+    case 5:
         return do_random_run<RankLookupType, GeneratorSMMorph>(timeout, max_iter, n, p, all_sols,
+                rgen, use_phase_1, seed);
+    case 6:
+        return do_random_run<RankLookupType, GeneratorCompleteGraph>(timeout, max_iter, n, p, all_sols,
                 rgen, use_phase_1, seed);
     }
     return 1;
@@ -633,13 +644,15 @@ int main(int argc, char** argv) {
             ("seed,s", po::value<int>(&seed)->default_value(1),
                     "seed for random generator")
             ("type", po::value<int>(&type)->default_value(1),
-                    "1=array, 2=map, 3=linear scan")
+                    "1=array, 2=map, 3=linear scan, 4=auto")
             ("verbose,v", po::bool_switch(&verbose),
                     "Display verbose output (this is not fully implemented yet)")
             ("all,a", po::bool_switch(&all_sols),
                     "Find all solutions? (Default: just check whether a stable solution exists)")
             ("gen-type", po::value<int>(&gen_type)->default_value(1),
-                    "Generator type (1=edge gen, 2=edge gen (using binomial dist), 3=edge selection, 4=SR/SM morph")
+                     "generator type: 1=edge gen, 2=edge gen (using binomial dist),"
+                     "3=edge gen (using complement) 4=edge selection, 5=SR/SM morph"
+                     "6=complete, 7=auto")
             ("no-phase-1", po::bool_switch(&no_phase_1),
                     "Don't carry out phase 1? (Uses SAT solver only) (Ignored if input is from file)")
             ;
@@ -648,12 +661,12 @@ int main(int argc, char** argv) {
         po::store(po::parse_command_line(argc, argv, desc), vm);
         po::notify(vm);
 
-        if (type < 1 || type > 3) {
+        if (type < 1 || type > 4) {
             std::cout << "Invalid type." << std::endl << desc << std::endl;
             return 1;
         }
 
-        if (gen_type < 1 || gen_type > 4) {
+        if (gen_type < 1 || gen_type > 7) {
             std::cout << "Invalid generator type." << std::endl << desc << std::endl;
             return 1;
         }
@@ -666,6 +679,13 @@ int main(int argc, char** argv) {
             return 1;
         }
         
+        if (type == 4) {
+            if (n > 5000 || n > 1000 && n*p < 200 || n > 500 && n*p < 100)
+                type = 3;
+            else
+                type = 1;
+        }
+
         if (vm.count("help") || !(vm.count("file") || vm.count("random"))) {
             std::cout << desc << "\n";
             return 1;

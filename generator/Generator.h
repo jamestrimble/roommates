@@ -33,6 +33,16 @@ public:
     std::vector<std::vector<int> > generate();
 };
 
+class GeneratorEdgeGenerationComplement : public Generator {
+// This generates the complement graph first
+public:
+    GeneratorEdgeGenerationComplement(int n, double p, std::mt19937_64& rgen)
+        : Generator(n, p, rgen), comp_gen(n, 1.0 - p, rgen) {}
+    std::vector<std::vector<int> > generate();
+private:
+    GeneratorEdgeGeneration comp_gen;
+};
+
 class GeneratorEdgeSelection: public Generator {
 public:
     GeneratorEdgeSelection(int n, double p, std::mt19937_64& rgen)
@@ -50,6 +60,13 @@ private:
 class GeneratorSMMorph : public Generator {
 public:
     GeneratorSMMorph(int n, double p, std::mt19937_64& rgen)
+        : Generator(n, p, rgen) {}
+    std::vector<std::vector<int> > generate();
+};
+
+class GeneratorCompleteGraph : public Generator {
+public:
+    GeneratorCompleteGraph(int n, double p, std::mt19937_64& rgen)
         : Generator(n, p, rgen) {}
     std::vector<std::vector<int> > generate();
 };

@@ -146,6 +146,31 @@ std::vector<std::vector<int> > GeneratorEdgeGenerationBinom::generate() {
 
 ///////////////////////////////////////////////////////////////
 
+std::vector<std::vector<int> > GeneratorEdgeGenerationComplement::generate() {
+    std::vector<std::vector<int> > complement(comp_gen.generate());
+
+    std::vector<std::vector<int> > pref_lists(n, std::vector<int>());
+
+    boost::dynamic_bitset<> comp_adj_mat(n*n);
+    for (int i=0; i<n; i++)
+        for (auto j : complement[i])
+            comp_adj_mat[i*n + j] = 1;
+
+    for (int i=0; i<n; i++)
+        for (int j=0; j<n; j++)
+            if (!comp_adj_mat[i*n + j] && i != j)
+                pref_lists[i].push_back(j);
+
+    for (int i=0; i<n; i++) {
+        std::vector<int>& v = pref_lists[i];
+        std::shuffle(v.begin(), v.end(), rgen);
+    }
+
+    return pref_lists;
+}
+
+///////////////////////////////////////////////////////////////
+
 void shuffle_to_adjmat(std::vector<std::pair<int, int> >& edges, boost::dynamic_bitset<>& adj_mat,
         int m, int n, std::mt19937_64& rgen) {
     // Select m edges from _edges_ by shuffling, and add them to adj_mat.
@@ -241,6 +266,28 @@ std::vector<std::vector<int> > GeneratorEdgeSelection::generate() {
         int w = possible_edges[i].second;
         pref_lists[v].push_back(w);
         pref_lists[w].push_back(v);
+    }
+
+    for (int i=0; i<n; i++) {
+        std::vector<int>& v = pref_lists[i];
+        std::shuffle(v.begin(), v.end(), rgen);
+    }
+
+    return pref_lists;
+}
+
+///////////////////////////////////////////////////////////////
+
+std::vector<std::vector<int> > GeneratorCompleteGraph::generate() {
+    if (p != 1) throw GenError("p must equal 1 for this generator");
+
+    std::vector<std::vector<int> > pref_lists(n, std::vector<int>());
+
+    for (int i=0; i<n-1; i++) {
+        for (int j=i+1; j<n; j++) {
+            pref_lists[i].push_back(j);
+            pref_lists[j].push_back(i);
+        }
     }
 
     for (int i=0; i<n; i++) {
