@@ -3,7 +3,7 @@
 #include <random>
 #include <vector>
 
-#include "generator.h"
+#include "Generator.h"
 
 int main(int argc, char** argv) {
     if (argc < 5) {
