@@ -35,8 +35,7 @@ public:
     void build_sat();
     int solve_sat(bool display_sols);  // Find all solutions, and return count
     bool is_sat();
-    std::vector<int> find_rotation(std::vector<int>& fst, std::vector<int>& snd,
-            std::vector<int>& last, int x);
+    int matching_size;
     SRSat();
     ~SRSat();
 
@@ -59,6 +58,9 @@ private:
     // Create an implies constraint
     inline void implies(Lit a, Lit b) {s.addClause(~a, b);}
     void displayMatching();
+    std::vector<int> find_rotation(std::vector<int>& fst, std::vector<int>& snd,
+            std::vector<int>& last, int x);
+    void calc_matching_size();
 };
 
 template<class RankLookupType>
@@ -448,6 +450,17 @@ void SRSat<RankLookupType>::displayMatching() {
 }
 
 template<class RankLookupType>
+void SRSat<RankLookupType>::calc_matching_size() {
+    matching_size = 0;
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<length[i]; j++) {
+            int k = pref[i][j];
+            if (i<k && s.modelValue(assigned[i][j]) == l_True) matching_size += 2;
+        }
+    }
+}
+
+template<class RankLookupType>
 int SRSat<RankLookupType>::solve_sat(bool display_sols) {
     // Return value: number of stable solutions
     int n_solutions = 0;
@@ -456,6 +469,7 @@ int SRSat<RankLookupType>::solve_sat(bool display_sols) {
     while (s.solve()) {
         if (display_sols) displayMatching();
         n_solutions++;
+        if (n_solutions == 1) calc_matching_size();
 
         // Create a new clause to rule out found solution
         newClause.clear();
@@ -474,7 +488,9 @@ int SRSat<RankLookupType>::solve_sat(bool display_sols) {
 
 template<class RankLookupType>
 bool SRSat<RankLookupType>::is_sat() {
-    return s.solve();
+    bool stable_sol_exists = s.solve();
+    if (stable_sol_exists) calc_matching_size();
+    return stable_sol_exists;
 }
 
 
@@ -533,7 +549,7 @@ int normal_run(std::string filename, bool verbose, bool all_sols) {
 
 template<class RankLookupType, class GeneratorType>
 int do_random_run(double timeout, int max_iter, int n, double p, bool all_sols,
-               std::mt19937_64& rgen, bool use_phase_1, int seed) {
+               std::mt19937_64& rgen, bool use_phase_1, int seed, bool record_sol_sizes) {
 
     std::ios_base::sync_with_stdio(false);
 
@@ -554,31 +570,49 @@ int do_random_run(double timeout, int max_iter, int n, double p, bool all_sols,
     std::map<int, int> sol_count_map;
     if (all_sols) sol_count_map[0] = 0;
 
+    // A map with number of agents in a stable solution as key and number of
+    // instances with this many agents in a stable solution as value.
+    // This map is only used if record_sol_sizes is true
+    std::map<int, int> sol_size_map;
+
     while (true) {
         SRSat<RankLookupType> srSat;
         srSat.create(gen.generate());
         if (use_phase_1) srSat.phase1();
         num_instances++;
         srSat.build_sat();
+        bool is_stable;
         if (all_sols)  {
             int n_sols = srSat.solve_sat(false);
+            if (n_sols > 0) stable_count++;
             if (sol_count_map.count(n_sols))
                 ++sol_count_map[n_sols];
             else
                 sol_count_map[n_sols] = 1;
             if (use_phase_1 && (n_sols==0) == srSat.phase2()) throw SolvingError("Solvers disagree!");
+            is_stable = n_sols > 0;
         } else {
-            bool is_stable = srSat.is_sat();
+            is_stable = srSat.is_sat();
             if (is_stable) stable_count++;
             // Double-check correctness
             if (use_phase_1 && is_stable != srSat.phase2()) throw SolvingError("Solvers disagree!");
+        }
+        if (is_stable && record_sol_sizes) {
+            int sol_size = srSat.matching_size;
+            if (sol_size_map.count(sol_size))
+                ++sol_size_map[sol_size];
+            else
+                sol_size_map[sol_size] = 1;
         }
         if ((max_iter!=-1 && num_instances==max_iter) || double(clock() - start_time)/CLOCKS_PER_SEC > timeout) break;
     }
 
     if (all_sols)
         for (auto it : sol_count_map)
-            std::cout << it.first << "\t" << it.second << std::endl;
+            std::cout << "sol_count\t" << it.first << "\t" << it.second << std::endl;
+    if (record_sol_sizes)
+        for (auto it : sol_size_map)
+            std::cout << "sol_size\t" << it.first << "\t" << it.second << std::endl;
     
     double proportion_stable = (double)stable_count / (double)num_instances;
     std::cout << n << "\t" << p << "\t" << num_instances << "\t" << 
@@ -589,7 +623,7 @@ int do_random_run(double timeout, int max_iter, int n, double p, bool all_sols,
 
 template<class RankLookupType>
 int random_run(double timeout, int max_iter, int n, double p, bool all_sols,
-               std::mt19937_64& rgen, bool use_phase_1, int seed, int gen_type) {
+               std::mt19937_64& rgen, bool use_phase_1, int seed, int gen_type, bool record_sol_sizes) {
     if (gen_type == 7) {
         if      (p == 1)  gen_type = 6;
         else if (p > 0.7) gen_type = 3;
@@ -598,22 +632,22 @@ int random_run(double timeout, int max_iter, int n, double p, bool all_sols,
     switch(gen_type) {
     case 1:
         return do_random_run<RankLookupType, GeneratorEdgeGeneration>(timeout, max_iter, n, p, all_sols,
-                rgen, use_phase_1, seed);
+                rgen, use_phase_1, seed, record_sol_sizes);
     case 2:
         return do_random_run<RankLookupType, GeneratorEdgeGenerationBinom>(timeout, max_iter, n, p, all_sols,
-                rgen, use_phase_1, seed);
+                rgen, use_phase_1, seed, record_sol_sizes);
     case 3:
         return do_random_run<RankLookupType, GeneratorEdgeGenerationComplement>(timeout, max_iter, n, p, all_sols,
-                rgen, use_phase_1, seed);
+                rgen, use_phase_1, seed, record_sol_sizes);
     case 4:
         return do_random_run<RankLookupType, GeneratorEdgeSelection>(timeout, max_iter, n, p, all_sols,
-                rgen, use_phase_1, seed);
+                rgen, use_phase_1, seed, record_sol_sizes);
     case 5:
         return do_random_run<RankLookupType, GeneratorSMMorph>(timeout, max_iter, n, p, all_sols,
-                rgen, use_phase_1, seed);
+                rgen, use_phase_1, seed, record_sol_sizes);
     case 6:
         return do_random_run<RankLookupType, GeneratorCompleteGraph>(timeout, max_iter, n, p, all_sols,
-                rgen, use_phase_1, seed);
+                rgen, use_phase_1, seed, record_sol_sizes);
     }
     return 1;
 }
@@ -627,6 +661,7 @@ int main(int argc, char** argv) {
     int max_iter;
     bool verbose;
     bool all_sols;  // find all solutions, or just check whether stable?
+    bool record_sol_sizes;  // record size of stable solutions? (random runs only)
     int gen_type;
     bool no_phase_1;
     try {
@@ -649,6 +684,8 @@ int main(int argc, char** argv) {
                     "Display verbose output (this is not fully implemented yet)")
             ("all,a", po::bool_switch(&all_sols),
                     "Find all solutions? (Default: just check whether a stable solution exists)")
+            ("record-sizes", po::bool_switch(&record_sol_sizes),
+                    "Record sizes of stable solutions in random runs? (Default: off)")
             ("gen-type", po::value<int>(&gen_type)->default_value(1),
                      "generator type: 1=edge gen, 2=edge gen (using binomial dist),"
                      "3=edge gen (using complement) 4=edge selection, 5=SR/SM morph"
@@ -680,7 +717,7 @@ int main(int argc, char** argv) {
         }
         
         if (type == 4) {
-            if (n > 5000 || n > 1000 && n*p < 200 || n > 500 && n*p < 100)
+            if (n > 5000 || (n > 1000 && n*p < 200) || (n > 500 && n*p < 100))
                 type = 3;
             else
                 type = 1;
@@ -702,9 +739,15 @@ int main(int argc, char** argv) {
 
             // TODO: avoid passing seed
             switch (type) {
-                case 1: return random_run<RankLookupArray>(timeout, max_iter, n, p, all_sols, rgen, !no_phase_1, seed, gen_type);
-                case 2: return random_run<RankLookupMap>(timeout, max_iter, n, p, all_sols, rgen, !no_phase_1, seed, gen_type);
-                case 3: return random_run<RankLookupLinearScan>(timeout, max_iter, n, p, all_sols, rgen, !no_phase_1, seed, gen_type);
+                case 1: 
+                    return random_run<RankLookupArray>(
+                            timeout, max_iter, n, p, all_sols, rgen, !no_phase_1, seed, gen_type, record_sol_sizes);
+                case 2:
+                    return random_run<RankLookupMap>(
+                            timeout, max_iter, n, p, all_sols, rgen, !no_phase_1, seed, gen_type, record_sol_sizes);
+                case 3:
+                    return random_run<RankLookupLinearScan>(
+                            timeout, max_iter, n, p, all_sols, rgen, !no_phase_1, seed, gen_type, record_sol_sizes);
             }
         }
     } catch (po::error& e) {
