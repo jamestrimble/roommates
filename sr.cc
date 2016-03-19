@@ -1,5 +1,4 @@
-#include "generator/generator.h"
-#include "generator_sm_morph/generator.h"
+#include "generator/Generator.h"
 #include "ranklookup.h"
 #include "Solver.h"
 #include <cmath>
@@ -532,23 +531,22 @@ int normal_run(std::string filename, bool verbose, bool all_sols) {
 	return 0;
 }
 
-template<class RankLookupType>
-int random_run(double timeout, int max_iter, unsigned int n, double p, unsigned int seed, bool all_sols,
-               bool smmorph, bool use_phase_1) {
+template<class RankLookupType, class GeneratorType>
+int do_random_run(double timeout, int max_iter, unsigned int n, double p, bool all_sols,
+               std::mt19937_64& rgen, bool use_phase_1, unsigned int seed) {
 
     std::ios_base::sync_with_stdio(false);
 
     if (p > 1) {
-        std::cout << n << "\t" << p << "\t" << 0 << "\t" << 
-                    -1 << "\t" << seed << std::endl;
-        return 0;
+        // TODO: throw an exception
+        return -1;
     }
+
+    auto gen = GeneratorType(n, p, rgen);
 
     int stable_count = 0;
     unsigned int num_instances = 0;
     clock_t start_time = clock();
-    std::mt19937_64 rgen;
-    rgen.seed(seed);
 
     // A map with stable solution count as key and number of instances
     // with this number of stable sols as value
@@ -558,7 +556,7 @@ int random_run(double timeout, int max_iter, unsigned int n, double p, unsigned 
 
     while (true) {
         SRSat<RankLookupType> srSat;
-        srSat.create(smmorph ? generate_morph(n, p, rgen) : generate(n, p, rgen));
+        srSat.create(gen.generate());
         if (use_phase_1) srSat.phase1();
         num_instances++;
         srSat.build_sat();
@@ -589,6 +587,26 @@ int random_run(double timeout, int max_iter, unsigned int n, double p, unsigned 
     return 0;
 }
 
+template<class RankLookupType>
+int random_run(double timeout, int max_iter, unsigned int n, double p, bool all_sols,
+               std::mt19937_64& rgen, bool use_phase_1, unsigned int seed, int gen_type) {
+    switch(gen_type) {
+    case 1:
+        return do_random_run<RankLookupType, GeneratorEdgeGeneration>(timeout, max_iter, n, p, all_sols,
+                rgen, use_phase_1, seed);
+    case 2:
+        return do_random_run<RankLookupType, GeneratorEdgeGenerationBinom>(timeout, max_iter, n, p, all_sols,
+                rgen, use_phase_1, seed);
+    case 3:
+        return do_random_run<RankLookupType, GeneratorEdgeSelection>(timeout, max_iter, n, p, all_sols,
+                rgen, use_phase_1, seed);
+    case 4:
+        return do_random_run<RankLookupType, GeneratorSMMorph>(timeout, max_iter, n, p, all_sols,
+                rgen, use_phase_1, seed);
+    }
+    return 1;
+}
+
 int main(int argc, char** argv) {
     double timeout = -1;
     unsigned int n = 100;
@@ -598,7 +616,7 @@ int main(int argc, char** argv) {
     int max_iter;
     bool verbose;
     bool all_sols;  // find all solutions, or just check whether stable?
-    bool smmorph;
+    int gen_type;
     bool no_phase_1;
     try {
         po::options_description desc("Allowed options");
@@ -620,8 +638,8 @@ int main(int argc, char** argv) {
                     "Display verbose output (this is not fully implemented yet)")
             ("all,a", po::bool_switch(&all_sols),
                     "Find all solutions? (Default: just check whether a stable solution exists)")
-            ("smmorph", po::bool_switch(&smmorph),
-                    "Use SM morph generator?")
+            ("gen-type", po::value<int>(&gen_type)->default_value(1),
+                    "Generator type (1=edge gen, 2=edge gen (using binomial dist), 3=edge selection, 4=SR/SM morph")
             ("no-phase-1", po::bool_switch(&no_phase_1),
                     "Don't carry out phase 1? (Uses SAT solver only) (Ignored if input is from file)")
             ;
@@ -632,6 +650,11 @@ int main(int argc, char** argv) {
 
         if (type < 1 || type > 3) {
             std::cout << "Invalid type." << std::endl << desc << std::endl;
+            return 1;
+        }
+
+        if (gen_type < 1 || gen_type > 4) {
+            std::cout << "Invalid generator type." << std::endl << desc << std::endl;
             return 1;
         }
 
@@ -654,11 +677,14 @@ int main(int argc, char** argv) {
                 case 3: return normal_run<RankLookupLinearScan>(filename, verbose, all_sols);
             }
         } else if (vm.count("random")) {
-            switch (type) {
-                case 1: return random_run<RankLookupArray>(timeout, max_iter, n, p, seed, all_sols, smmorph, !no_phase_1);
-                case 2: return random_run<RankLookupMap>(timeout, max_iter, n, p, seed, all_sols, smmorph, !no_phase_1);
-                case 3: return random_run<RankLookupLinearScan>(timeout, max_iter, n, p, seed, all_sols, smmorph, !no_phase_1);
+            std::mt19937_64 rgen;
+            rgen.seed(seed);
 
+            // TODO: avoid passing seed
+            switch (type) {
+                case 1: return random_run<RankLookupArray>(timeout, max_iter, n, p, all_sols, rgen, !no_phase_1, seed, gen_type);
+                case 2: return random_run<RankLookupMap>(timeout, max_iter, n, p, all_sols, rgen, !no_phase_1, seed, gen_type);
+                case 3: return random_run<RankLookupLinearScan>(timeout, max_iter, n, p, all_sols, rgen, !no_phase_1, seed, gen_type);
             }
         }
     } catch (po::error& e) {

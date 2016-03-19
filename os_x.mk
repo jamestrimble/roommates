@@ -4,8 +4,9 @@ MINISAT_LIB=../minisat/minisat/core/lib.a
 all: sr generate
 
 sr: sr.cc generator/Generator.cc generator/Generator.h ranklookup.h
-	g++ --std=c++11 -o sr -O3 -I ../minisat/minisat \
-	           -lboost_program_options \
+	clang++ --stdlib=libc++ --std=c++11 -o sr -O3 -I ../minisat/minisat \
+		        -I /usr/local/Cellar/boost/1.60.0_1/include \
+		        -I /usr/local/Cellar/boost/1.60.0_1/lib \
 				sr.cc \
 	           generator/Generator.cc \
                $(MINISAT_LIB) \
@@ -13,8 +14,9 @@ sr: sr.cc generator/Generator.cc generator/Generator.h ranklookup.h
                -Wall
 
 generate: generator/generator_main.cc generator/Generator.cc generator/Generator.h
-	g++ --std=c++11 -o generate -O3 -I ../minisat/minisat \
-	           -lboost_program_options \
+	clang++ --stdlib=libc++ --std=c++11 -o generate -O3 -I ../minisat/minisat \
+		        -I /usr/local/Cellar/boost/1.60.0_1/include \
+		        -I /usr/local/Cellar/boost/1.60.0_1/lib \
 	           generator/generator_main.cc \
 	           generator/Generator.cc \
                -Wall
