@@ -562,6 +562,7 @@ int do_random_run(double timeout, int max_iter, int n, double p, bool all_sols,
 
     int stable_count = 0;
     int num_instances = 0;
+    unsigned long long total_edges = 0;
     clock_t start_time = clock();
 
     // A map with stable solution count as key and number of instances
@@ -577,7 +578,14 @@ int do_random_run(double timeout, int max_iter, int n, double p, bool all_sols,
 
     while (true) {
         SRSat<RankLookupType> srSat;
-        srSat.create(gen.generate());
+        auto instance = gen.generate();
+
+        unsigned long long edges = 0;
+        for (int i=0; i<n; i++)
+            edges += instance[i].size();
+        total_edges += (edges/2);
+
+        srSat.create(instance);
         if (use_phase_1) srSat.phase1();
         num_instances++;
         srSat.build_sat();
@@ -616,7 +624,7 @@ int do_random_run(double timeout, int max_iter, int n, double p, bool all_sols,
     
     double proportion_stable = (double)stable_count / (double)num_instances;
     std::cout << n << "\t" << p << "\t" << num_instances << "\t" << 
-                proportion_stable << "\t" << seed << std::endl;
+                proportion_stable << "\t" << seed << "\t" << total_edges << std::endl;
 
     return 0;
 }
