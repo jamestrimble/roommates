@@ -26,6 +26,13 @@ public:
     std::vector<std::vector<int> > generate();
 };
 
+class GeneratorEdgeGenerationSimple : public Generator {
+public:
+    GeneratorEdgeGenerationSimple(int n, double p, std::mt19937_64& rgen)
+        : Generator(n, p, rgen) {}
+    std::vector<std::vector<int> > generate();
+};
+
 class GeneratorEdgeGenerationBinom: public Generator {
 public:
     GeneratorEdgeGenerationBinom(int n, double p, std::mt19937_64& rgen)
