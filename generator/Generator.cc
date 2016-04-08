@@ -11,6 +11,15 @@
 
 #include "Generator.h"
 
+void shuffle_pref_lists(std::vector<std::vector<int> >& pref_lists, int n, std::mt19937_64& rgen) {
+    for (int i=0; i<n; i++) {
+        std::vector<int>& v = pref_lists[i];
+        std::shuffle(v.begin(), v.end(), rgen);
+    }
+}
+
+///////////////////////////////////////////////////////////////
+
 // https://networkx.github.io/documentation/latest/_modules/networkx/generators/random_graphs.html#fast_gnp_random_graph
 std::vector<std::vector<int> > GeneratorEdgeGeneration::generate() {
     std::uniform_real_distribution<double> dis(0.0, 1.0);
@@ -37,11 +46,7 @@ std::vector<std::vector<int> > GeneratorEdgeGeneration::generate() {
         }
     }
 
-    for (int i=0; i<n; i++) {
-        std::vector<int>& v = pref_lists[i];
-        std::shuffle(v.begin(), v.end(), rgen);
-    }
-
+    shuffle_pref_lists(pref_lists, n, rgen);
     return pref_lists;
 }
 
@@ -61,11 +66,7 @@ std::vector<std::vector<int> > GeneratorEdgeGenerationSimple::generate() {
         }
     }
 
-    for (int i=0; i<n; i++) {
-        std::vector<int>& v = pref_lists[i];
-        std::shuffle(v.begin(), v.end(), rgen);
-    }
-
+    shuffle_pref_lists(pref_lists, n, rgen);
     return pref_lists;
 }
 
@@ -127,11 +128,7 @@ std::vector<std::vector<int> > GeneratorEdgeGenerationBinom::generate() {
         }
     }
 
-    for (int i=0; i<n; i++) {
-        std::vector<int>& v = pref_lists[i];
-        std::shuffle(v.begin(), v.end(), rgen);
-    }
-
+    shuffle_pref_lists(pref_lists, n, rgen);
     return pref_lists;
 }
 
@@ -152,11 +149,7 @@ std::vector<std::vector<int> > GeneratorEdgeGenerationComplement::generate() {
             if (!comp_adj_mat[i*n + j] && i != j)
                 pref_lists[i].push_back(j);
 
-    for (int i=0; i<n; i++) {
-        std::vector<int>& v = pref_lists[i];
-        std::shuffle(v.begin(), v.end(), rgen);
-    }
-
+    shuffle_pref_lists(pref_lists, n, rgen);
     return pref_lists;
 }
 
@@ -180,8 +173,6 @@ std::vector<std::vector<int> > GeneratorSMMorph::generate() {
     
     if (n % 1 != 0) throw GenError("n must be even for this generator");
 
-    // TODO: Refactor to reduce duplication of shuffle
-
     boost::dynamic_bitset<> E1(n*n);  // As adjacency matrix. For j>i, E1[i*n + j] == 1 <-> edge (i,j) exists
 
     std::vector<std::pair<int, int> > clique_edges;
@@ -189,7 +180,7 @@ std::vector<std::vector<int> > GeneratorSMMorph::generate() {
         for (int j=i+1; j<n; j++)
             clique_edges.push_back(std::pair<int, int>(i, j));
 
-    shuffle_to_adjmat(clique_edges, E1, n*n / 4, n, rgen);
+    shuffle_to_adjmat(clique_edges, E1, (n/2)*(n/2), n, rgen);
 
     boost::dynamic_bitset<> E2(n*n);  // As adjacency matrix. For j>i, E2[i*n + j] == 1 <-> edge (i,j) exists
     for (int i=0; i<n/2; i++)
@@ -220,8 +211,7 @@ std::vector<std::vector<int> > GeneratorSMMorph::generate() {
     if (m2 > E2minusEx_edges.size()) m2 = E2minusEx_edges.size();
     shuffle_to_adjmat(E2minusEx_edges, chosen_edges, m2, n, rgen);
 
-    std::vector<std::vector<int> > pref_lists;
-    for (int i=0; i<n; i++) pref_lists.push_back(std::vector<int>());
+    std::vector<std::vector<int> > pref_lists(n, std::vector<int>());
 
     for (int i=0; i<n-1; i++) {
         for (int j=i+1; j<n; j++) {
@@ -232,11 +222,54 @@ std::vector<std::vector<int> > GeneratorSMMorph::generate() {
         }
     }
 
-    for (int i=0; i<n; i++) {
-        std::vector<int>& v = pref_lists[i];
-        std::shuffle(v.begin(), v.end(), rgen);
+    shuffle_pref_lists(pref_lists, n, rgen);
+    return pref_lists;
+}
+
+std::vector<std::vector<int> > GeneratorSMMorphTypeA::generate() {
+    if (n % 1 != 0) throw GenError("n must be even for this generator");
+
+    int m = (n/2) * (n/2);
+
+    boost::dynamic_bitset<> E1(n*n);  // As adjacency matrix. For j>i, E1[i*n + j] == 1 <-> edge (i,j) exists
+    for (int i=0; i<n-1; i++)
+        for (int j=i+1; j<n; j++)
+            E1[i*n + j] = true;
+
+    std::vector<std::pair<int, int> > biclique_edges;
+    for (int i=0; i<n/2; i++)
+        for (int j=n/2; j<n; j++)
+            biclique_edges.push_back(std::pair<int, int>(i, j));
+
+    boost::dynamic_bitset<> E(n*n);
+
+    int m2 = std::round((1-p) * m);
+    if (m2 > m) m2 = m;
+    shuffle_to_adjmat(biclique_edges, E, m2, n, rgen);
+
+    boost::dynamic_bitset<> E1minusE = E1 - E;
+
+    std::vector<std::pair<int, int> > E1minusE_edges;
+    for (int i=0; i<n-1; i++)
+        for (int j=i+1; j<n; j++)
+            if (E1minusE[i*n + j]) E1minusE_edges.push_back(std::pair<int, int>(i, j));
+
+    int m1 = std::round(p * m);
+    if (m1 > m) m1 = m;
+    shuffle_to_adjmat(E1minusE_edges, E, m1, n, rgen);
+
+    std::vector<std::vector<int> > pref_lists(n, std::vector<int>());
+
+    for (int i=0; i<n-1; i++) {
+        for (int j=i+1; j<n; j++) {
+            if (E[i*n + j]) {
+                pref_lists[i].push_back(j);
+                pref_lists[j].push_back(i);
+            }
+        }
     }
 
+    shuffle_pref_lists(pref_lists, n, rgen);
     return pref_lists;
 }
 
@@ -259,11 +292,7 @@ std::vector<std::vector<int> > GeneratorEdgeSelection::generate() {
         pref_lists[w].push_back(v);
     }
 
-    for (int i=0; i<n; i++) {
-        std::vector<int>& v = pref_lists[i];
-        std::shuffle(v.begin(), v.end(), rgen);
-    }
-
+    shuffle_pref_lists(pref_lists, n, rgen);
     return pref_lists;
 }
 
@@ -281,10 +310,6 @@ std::vector<std::vector<int> > GeneratorCompleteGraph::generate() {
         }
     }
 
-    for (int i=0; i<n; i++) {
-        std::vector<int>& v = pref_lists[i];
-        std::shuffle(v.begin(), v.end(), rgen);
-    }
-
+    shuffle_pref_lists(pref_lists, n, rgen);
     return pref_lists;
 }

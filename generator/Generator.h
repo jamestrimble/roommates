@@ -71,6 +71,13 @@ public:
     std::vector<std::vector<int> > generate();
 };
 
+class GeneratorSMMorphTypeA : public Generator {
+public:
+    GeneratorSMMorphTypeA(int n, double p, std::mt19937_64& rgen)
+        : Generator(n, p, rgen) {}
+    std::vector<std::vector<int> > generate();
+};
+
 class GeneratorCompleteGraph : public Generator {
 public:
     GeneratorCompleteGraph(int n, double p, std::mt19937_64& rgen)

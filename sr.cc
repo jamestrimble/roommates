@@ -632,7 +632,7 @@ int do_random_run(double timeout, int max_iter, int n, double p, bool all_sols,
 template<class RankLookupType>
 int random_run(double timeout, int max_iter, int n, double p, bool all_sols,
                std::mt19937_64& rgen, bool use_phase_1, int seed, int gen_type, bool record_sol_sizes) {
-    if (gen_type == 8) {
+    if (gen_type == 9) {
         if      (p == 1)  gen_type = 7;
         else if (p > 0.7) gen_type = 4;
         else              gen_type = 2;
@@ -654,9 +654,12 @@ int random_run(double timeout, int max_iter, int n, double p, bool all_sols,
         return do_random_run<RankLookupType, GeneratorEdgeSelection>(timeout, max_iter, n, p, all_sols,
                 rgen, use_phase_1, seed, record_sol_sizes);
     case 6:
-        return do_random_run<RankLookupType, GeneratorSMMorph>(timeout, max_iter, n, p, all_sols,
+        return do_random_run<RankLookupType, GeneratorSMMorphTypeA>(timeout, max_iter, n, p, all_sols,
                 rgen, use_phase_1, seed, record_sol_sizes);
     case 7:
+        return do_random_run<RankLookupType, GeneratorSMMorph>(timeout, max_iter, n, p, all_sols,
+                rgen, use_phase_1, seed, record_sol_sizes);
+    case 8:
         return do_random_run<RankLookupType, GeneratorCompleteGraph>(timeout, max_iter, n, p, all_sols,
                 rgen, use_phase_1, seed, record_sol_sizes);
     }
@@ -700,8 +703,9 @@ int main(int argc, char** argv) {
             ("gen-type", po::value<int>(&gen_type)->default_value(2),
                      "generator type: 1=simple edge gen, 2=fast edge gen, "
                      "3=edge gen (using binomial dist),"
-                     "4=edge gen (using complement) 5=edge selection, 6=SR/SM morph"
-                     "7=complete, 8=auto")
+                     "4=edge gen (using complement) 5=edge selection, 6=SR/SM morph typ A, "
+                     "7=SR/SM morph type B, "
+                     "8=complete, 9=auto")
             ("no-phase-1", po::bool_switch(&no_phase_1),
                     "Don't carry out phase 1? (Uses SAT solver only) (Ignored if input is from file)")
             ;
@@ -715,7 +719,7 @@ int main(int argc, char** argv) {
             return 1;
         }
 
-        if (gen_type < 1 || gen_type > 8) {
+        if (gen_type < 1 || gen_type > 9) {
             std::cout << "Invalid generator type." << std::endl << desc << std::endl;
             return 1;
         }
