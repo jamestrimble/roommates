@@ -308,7 +308,7 @@ bool SRSat<RankLookupType>::phase2() {
         }
 
         // Update our 'pointer' to the first agent with at least 2 remaining preferences
-        while (fst[first_with_at_least_2] == last[first_with_at_least_2])
+        while (first_with_at_least_2 < n && fst[first_with_at_least_2] == last[first_with_at_least_2])
             first_with_at_least_2++;
     }
 
