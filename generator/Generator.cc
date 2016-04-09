@@ -33,13 +33,14 @@ std::vector<std::vector<int> > GeneratorEdgeGeneration::generate() {
     int v = 1;
     while (v < n) {
         double lr = std::log(1.0 - dis(rgen));
-        if (p > 0.999999999)
+        if (p > 0.999999999) {
             ++w;
-        else
+        } else {
             double lr_over_lp = lr/lp;
             // avoid casting a double that is greater than the largest possible long long
             if (lr_over_lp > n_sq) lr_over_lp = n_sq; 
             w = w + 1 + (long long)(lr_over_lp);
+        }
         while (w >= v && v < n) {
             w = w - v;
             ++v;
