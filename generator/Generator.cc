@@ -26,28 +26,30 @@ std::vector<std::vector<int> > GeneratorEdgeGeneration::generate() {
     
     std::vector<std::vector<int> > pref_lists(n, std::vector<int>());
 
-    long long w = -1;
-    long long n_sq = n * n;
-    double lp = std::log(1.0 - p);
+    if (p > 0) {
+        long long w = -1;
+        long long n_sq = n * n;
+        double lp = std::log(1.0 - p);
 
-    int v = 1;
-    while (v < n) {
-        double lr = std::log(1.0 - dis(rgen));
-        if (p > 0.999999999) {
-            ++w;
-        } else {
-            double lr_over_lp = lr/lp;
-            // avoid casting a double that is greater than the largest possible long long
-            if (lr_over_lp > n_sq) lr_over_lp = n_sq; 
-            w = w + 1 + (long long)(lr_over_lp);
-        }
-        while (w >= v && v < n) {
-            w = w - v;
-            ++v;
-        }
-        if (v < n) {
-            pref_lists[v].push_back(w);
-            pref_lists[w].push_back(v);
+        int v = 1;
+        while (v < n) {
+            double lr = std::log(1.0 - dis(rgen));
+            if (p > 0.999999999) {
+                ++w;
+            } else {
+                double lr_over_lp = lr/lp;
+                // avoid casting a double that is greater than the largest possible long long
+                if (lr_over_lp > n_sq) lr_over_lp = n_sq; 
+                w = w + 1 + (long long)(lr_over_lp);
+            }
+            while (w >= v && v < n) {
+                w = w - v;
+                ++v;
+            }
+            if (v < n) {
+                pref_lists[v].push_back(w);
+                pref_lists[w].push_back(v);
+            }
         }
     }
 
