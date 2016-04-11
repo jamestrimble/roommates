@@ -340,29 +340,20 @@ Lit SRSat<RankLookupType>::createLit() {
  */
 template<class RankLookupType>
 void SRSat<RankLookupType>::build_sat() {
-    for (int i=0; i<n; i++) {
+    for (int i=0; i<n; i++)
         assigned.push_back(std::vector<Lit>(length[i]+1, mkLit(0)));
-    }
-    std::vector<std::vector<Lit> > assignedBelow(n, std::vector<Lit>());
-    std::vector<std::vector<Lit> > assignedAbove(n, std::vector<Lit>());
 
-    //Lit* assignedBlock = new Lit[n*n];
-    //for (int i=0; i<n; i++) {
-    //    assigned[i] = assignedBlock + i*n;
-    //}
+    std::vector<std::vector<Lit> > assignedAbove(n, std::vector<Lit>());
 
     // For each agent A, create a variable which is true iff A
     // is unassigned
-    for (int i=0; i<n; i++) {
+    for (int i=0; i<n; i++)
         assigned[i][length[i]] = createLit();       
-    }
 
     for (int i=0; i<n; i++) {
         // For each agent A, create a variable for each position in A's preference
-        // list which is true iff A gets better than her j^th choice. Similarly,
-        // create variables which are true iff A gets worse than her j^th choice.
+        // list which is true iff A gets worse than her j^th choice.
         for (int j=0; j<=length[i]; j++) {
-            assignedBelow[i].push_back(createLit());
             assignedAbove[i].push_back(createLit());
         }
     }
@@ -387,30 +378,24 @@ void SRSat<RankLookupType>::build_sat() {
     }
 
     for (int i=0; i<n; i++) {
-        // Constraint: For each agent A, either A is unmatched (second term), or
-        // is matched to someone else (second term)
-        s.addClause(assignedBelow[i][length[i]], assigned[i][length[i]]);
+        // Each agent must be matched
+        s.addClause(assignedAbove[i][0], assigned[i][0]);
     }
 
     for (int i=0; i<n; i++) {
         // Each agent can't do worse than being assigned to herself
         s.addClause(~assignedAbove[i][length[i]]);
-        // Each agent can't do better than her first preference
-        s.addClause(~assignedBelow[i][0]);
     }
 
     for (int i=0; i<n; i++) {
         for (int j=0; j<length[i]; j++) {
-            int k = pref[i][j];
-            // Equivalent to the following constraint in SR.java:
-            // implies(gt(agent[i],rank[i][k]),lt(agent[k],rank[k][i]))
-            implies(assignedAbove[i][rank_lookup.get_rank(i, k, pref)],
-                    assignedBelow[k][rank_lookup.get_rank(k, i, pref)]);
 
-            // It isn't necessary to have as many variables and
-            // constraints as below, but this system seems to work
-            // quite well. I haven't yet tested a version similar
-            // to the model of Prosser and Gent for stable marriage
+            // Let k be agent i's j^th preference. If i is assigned someone who
+            // he likes less than k, then k must be assigned to someone who she
+            // likes more than i.
+            int k = pref[i][j], r = rank_lookup.get_rank(k, i, pref);
+            if (r > 0) implies(assignedAbove[i][j], ~assignedAbove[k][r - 1]);
+            else       s.addClause(~assignedAbove[i][j]);
 
             // assignedAbove[i][j+1] implies assignedAbove[i][j]
             implies(assignedAbove[i][j+1], assignedAbove[i][j]);
@@ -425,13 +410,6 @@ void SRSat<RankLookupType>::build_sat() {
             s.addClause(~assignedAbove[i][j],
                         assigned[i][j+1],
                         assignedAbove[i][j+1]);
-
-            implies(assignedBelow[i][j], assignedBelow[i][j+1]);
-            implies(assigned[i][j], assignedBelow[i][j+1]);
-            implies(assignedBelow[i][j+1], ~assigned[i][j+1]);
-            s.addClause(~assignedBelow[i][j+1],
-                        assigned[i][j],
-                        assignedBelow[i][j]);
         }
     }
 }
