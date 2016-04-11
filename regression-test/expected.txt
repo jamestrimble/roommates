@@ -1,0 +1,851 @@
+sol_count	0	0
+sol_count	1	100
+100	0	100	1	0	0
+sol_count	0	0
+sol_count	1	100
+100	0.01	100	1	1	4966
+sol_count	0	7
+sol_count	1	92
+sol_count	2	1
+100	0.02	100	0.93	2	9883
+sol_count	0	6
+sol_count	1	90
+sol_count	2	4
+100	0.03	100	0.94	3	14797
+sol_count	0	10
+sol_count	1	79
+sol_count	2	11
+100	0.04	100	0.9	4	19913
+sol_count	0	11
+sol_count	1	77
+sol_count	2	12
+100	0.05	100	0.89	5	24811
+sol_count	0	22
+sol_count	1	65
+sol_count	2	11
+sol_count	4	1
+sol_count	6	1
+100	0.06	100	0.78	6	29750
+sol_count	0	24
+sol_count	1	71
+sol_count	2	4
+sol_count	3	1
+100	0.07	100	0.76	7	34549
+sol_count	0	28
+sol_count	1	61
+sol_count	2	11
+100	0.08	100	0.72	8	39425
+sol_count	0	30
+sol_count	1	56
+sol_count	2	10
+sol_count	4	3
+sol_count	6	1
+100	0.09	100	0.7	9	44762
+sol_count	0	37
+sol_count	1	46
+sol_count	2	14
+sol_count	3	2
+sol_count	6	1
+100	0.1	100	0.63	10	49311
+sol_count	0	41
+sol_count	1	46
+sol_count	2	10
+sol_count	3	2
+sol_count	8	1
+100	0.11	100	0.59	11	54606
+sol_count	0	53
+sol_count	1	32
+sol_count	2	12
+sol_count	4	2
+sol_count	8	1
+100	0.12	100	0.47	12	60023
+sol_count	0	47
+sol_count	1	36
+sol_count	2	10
+sol_count	3	3
+sol_count	4	4
+100	0.13	100	0.53	13	64586
+sol_count	0	44
+sol_count	1	43
+sol_count	2	8
+sol_count	3	2
+sol_count	4	3
+100	0.14	100	0.56	14	69270
+sol_count	0	50
+sol_count	1	29
+sol_count	2	12
+sol_count	3	6
+sol_count	4	3
+100	0.15	100	0.5	15	74074
+sol_count	0	48
+sol_count	1	29
+sol_count	2	17
+sol_count	3	3
+sol_count	4	3
+100	0.16	100	0.52	16	79414
+sol_count	0	49
+sol_count	1	32
+sol_count	2	14
+sol_count	3	3
+sol_count	4	1
+sol_count	8	1
+100	0.17	100	0.51	17	84323
+sol_count	0	46
+sol_count	1	28
+sol_count	2	19
+sol_count	3	6
+sol_count	12	1
+100	0.18	100	0.54	18	89012
+sol_count	0	50
+sol_count	1	26
+sol_count	2	18
+sol_count	3	3
+sol_count	4	3
+100	0.19	100	0.5	19	94321
+sol_count	0	51
+sol_count	1	30
+sol_count	2	15
+sol_count	3	3
+sol_count	4	1
+100	0.2	100	0.49	20	99413
+sol_count	0	45
+sol_count	1	30
+sol_count	2	19
+sol_count	3	3
+sol_count	4	2
+sol_count	6	1
+100	0.21	100	0.55	21	103662
+sol_count	0	50
+sol_count	1	24
+sol_count	2	18
+sol_count	3	4
+sol_count	4	4
+100	0.22	100	0.5	22	108558
+sol_count	0	43
+sol_count	1	24
+sol_count	2	16
+sol_count	3	5
+sol_count	4	8
+sol_count	5	1
+sol_count	6	1
+sol_count	8	2
+100	0.23	100	0.57	23	113632
+sol_count	0	55
+sol_count	1	24
+sol_count	2	13
+sol_count	3	5
+sol_count	4	2
+sol_count	6	1
+100	0.24	100	0.45	24	119153
+sol_count	0	36
+sol_count	1	22
+sol_count	2	28
+sol_count	3	3
+sol_count	4	7
+sol_count	5	2
+sol_count	6	1
+sol_count	8	1
+100	0.25	100	0.64	25	124011
+sol_count	0	47
+sol_count	1	26
+sol_count	2	13
+sol_count	3	6
+sol_count	4	6
+sol_count	6	1
+sol_count	10	1
+100	0.26	100	0.53	26	128449
+sol_count	0	51
+sol_count	1	19
+sol_count	2	20
+sol_count	3	1
+sol_count	4	4
+sol_count	5	3
+sol_count	6	2
+100	0.27	100	0.49	27	133209
+sol_count	0	51
+sol_count	1	17
+sol_count	2	18
+sol_count	3	6
+sol_count	4	4
+sol_count	5	1
+sol_count	8	2
+sol_count	10	1
+100	0.28	100	0.49	28	138374
+sol_count	0	43
+sol_count	1	17
+sol_count	2	24
+sol_count	3	3
+sol_count	4	4
+sol_count	5	2
+sol_count	6	5
+sol_count	8	1
+sol_count	10	1
+100	0.29	100	0.57	29	143675
+sol_count	0	46
+sol_count	1	16
+sol_count	2	20
+sol_count	3	6
+sol_count	4	5
+sol_count	5	3
+sol_count	6	2
+sol_count	7	1
+sol_count	8	1
+100	0.3	100	0.54	30	148749
+sol_count	0	51
+sol_count	1	19
+sol_count	2	20
+sol_count	3	3
+sol_count	4	4
+sol_count	5	1
+sol_count	8	1
+sol_count	12	1
+100	0.31	100	0.49	31	153419
+sol_count	0	42
+sol_count	1	18
+sol_count	2	21
+sol_count	3	7
+sol_count	4	5
+sol_count	6	5
+sol_count	7	2
+100	0.32	100	0.58	32	158226
+sol_count	0	46
+sol_count	1	19
+sol_count	2	17
+sol_count	3	6
+sol_count	4	5
+sol_count	5	1
+sol_count	6	4
+sol_count	7	1
+sol_count	12	1
+100	0.33	100	0.54	33	163402
+sol_count	0	45
+sol_count	1	21
+sol_count	2	18
+sol_count	3	5
+sol_count	4	4
+sol_count	5	3
+sol_count	6	2
+sol_count	8	1
+sol_count	9	1
+100	0.34	100	0.55	34	168071
+sol_count	0	49
+sol_count	1	25
+sol_count	2	15
+sol_count	3	4
+sol_count	4	5
+sol_count	8	2
+100	0.35	100	0.51	35	173871
+sol_count	0	47
+sol_count	1	17
+sol_count	2	20
+sol_count	3	4
+sol_count	4	10
+sol_count	5	1
+sol_count	8	1
+100	0.36	100	0.53	36	178610
+sol_count	0	42
+sol_count	1	25
+sol_count	2	17
+sol_count	3	8
+sol_count	4	6
+sol_count	6	2
+100	0.37	100	0.58	37	182895
+sol_count	0	38
+sol_count	1	16
+sol_count	2	28
+sol_count	3	8
+sol_count	4	5
+sol_count	6	2
+sol_count	7	1
+sol_count	8	1
+sol_count	14	1
+100	0.38	100	0.62	38	188045
+sol_count	0	44
+sol_count	1	17
+sol_count	2	18
+sol_count	3	5
+sol_count	4	9
+sol_count	5	3
+sol_count	8	2
+sol_count	9	1
+sol_count	10	1
+100	0.39	100	0.56	39	192784
+sol_count	0	47
+sol_count	1	16
+sol_count	2	21
+sol_count	3	4
+sol_count	4	6
+sol_count	5	4
+sol_count	6	1
+sol_count	10	1
+100	0.4	100	0.53	40	198312
+sol_count	0	35
+sol_count	1	24
+sol_count	2	25
+sol_count	3	5
+sol_count	4	5
+sol_count	5	1
+sol_count	6	2
+sol_count	7	2
+sol_count	8	1
+100	0.41	100	0.65	41	203262
+sol_count	0	30
+sol_count	1	12
+sol_count	2	33
+sol_count	3	9
+sol_count	4	9
+sol_count	5	4
+sol_count	6	2
+sol_count	16	1
+100	0.42	100	0.7	42	208083
+sol_count	0	45
+sol_count	1	18
+sol_count	2	16
+sol_count	3	8
+sol_count	4	5
+sol_count	5	1
+sol_count	7	2
+sol_count	8	2
+sol_count	9	1
+sol_count	10	2
+100	0.43	100	0.55	43	212805
+sol_count	0	39
+sol_count	1	27
+sol_count	2	19
+sol_count	3	6
+sol_count	4	5
+sol_count	6	1
+sol_count	8	1
+sol_count	10	1
+sol_count	12	1
+100	0.44	100	0.61	44	217747
+sol_count	0	33
+sol_count	1	33
+sol_count	2	17
+sol_count	3	10
+sol_count	4	5
+sol_count	6	1
+sol_count	8	1
+100	0.45	100	0.67	45	222952
+sol_count	0	35
+sol_count	1	19
+sol_count	2	23
+sol_count	3	13
+sol_count	4	5
+sol_count	5	1
+sol_count	6	2
+sol_count	8	2
+100	0.46	100	0.65	46	227761
+sol_count	0	39
+sol_count	1	21
+sol_count	2	25
+sol_count	3	9
+sol_count	4	3
+sol_count	5	1
+sol_count	6	2
+100	0.47	100	0.61	47	232614
+sol_count	0	38
+sol_count	1	26
+sol_count	2	18
+sol_count	3	5
+sol_count	4	10
+sol_count	5	1
+sol_count	6	1
+sol_count	11	1
+100	0.48	100	0.62	48	237493
+sol_count	0	31
+sol_count	1	28
+sol_count	2	18
+sol_count	3	8
+sol_count	4	11
+sol_count	6	1
+sol_count	8	2
+sol_count	15	1
+100	0.49	100	0.69	49	242373
+sol_count	0	39
+sol_count	1	18
+sol_count	2	20
+sol_count	3	10
+sol_count	4	7
+sol_count	5	1
+sol_count	6	3
+sol_count	10	1
+sol_count	16	1
+100	0.5	100	0.61	50	247248
+sol_count	0	39
+sol_count	1	23
+sol_count	2	22
+sol_count	3	4
+sol_count	4	8
+sol_count	6	3
+sol_count	8	1
+100	0.51	100	0.61	51	252696
+sol_count	0	36
+sol_count	1	23
+sol_count	2	22
+sol_count	3	6
+sol_count	4	9
+sol_count	5	2
+sol_count	6	2
+100	0.52	100	0.64	52	257006
+sol_count	0	39
+sol_count	1	17
+sol_count	2	19
+sol_count	3	9
+sol_count	4	9
+sol_count	5	2
+sol_count	6	3
+sol_count	7	1
+sol_count	14	1
+100	0.53	100	0.61	53	262119
+sol_count	0	48
+sol_count	1	19
+sol_count	2	17
+sol_count	3	7
+sol_count	4	6
+sol_count	6	3
+100	0.54	100	0.52	54	267732
+sol_count	0	33
+sol_count	1	23
+sol_count	2	23
+sol_count	3	7
+sol_count	4	8
+sol_count	5	1
+sol_count	6	3
+sol_count	9	2
+100	0.55	100	0.67	55	272048
+sol_count	0	43
+sol_count	1	16
+sol_count	2	23
+sol_count	3	4
+sol_count	4	5
+sol_count	5	2
+sol_count	6	1
+sol_count	7	2
+sol_count	8	2
+sol_count	10	1
+sol_count	12	1
+100	0.56	100	0.57	56	277075
+sol_count	0	44
+sol_count	1	23
+sol_count	2	12
+sol_count	3	7
+sol_count	4	10
+sol_count	5	3
+sol_count	6	1
+100	0.57	100	0.56	57	281968
+sol_count	0	34
+sol_count	1	23
+sol_count	2	15
+sol_count	3	9
+sol_count	4	10
+sol_count	5	3
+sol_count	6	5
+sol_count	8	1
+100	0.58	100	0.66	58	286847
+sol_count	0	41
+sol_count	1	25
+sol_count	2	15
+sol_count	3	5
+sol_count	4	9
+sol_count	5	2
+sol_count	7	1
+sol_count	8	1
+sol_count	9	1
+100	0.59	100	0.59	59	292427
+sol_count	0	34
+sol_count	1	22
+sol_count	2	20
+sol_count	3	7
+sol_count	4	9
+sol_count	5	2
+sol_count	6	3
+sol_count	8	2
+sol_count	14	1
+100	0.6	100	0.66	60	297262
+sol_count	0	41
+sol_count	1	17
+sol_count	2	17
+sol_count	3	7
+sol_count	4	9
+sol_count	5	3
+sol_count	6	3
+sol_count	9	2
+sol_count	11	1
+100	0.61	100	0.59	61	301824
+sol_count	0	33
+sol_count	1	20
+sol_count	2	25
+sol_count	3	10
+sol_count	4	8
+sol_count	5	1
+sol_count	6	2
+sol_count	7	1
+100	0.62	100	0.67	62	307130
+sol_count	0	40
+sol_count	1	25
+sol_count	2	16
+sol_count	3	8
+sol_count	4	6
+sol_count	5	2
+sol_count	6	2
+sol_count	8	1
+100	0.63	100	0.6	63	311152
+sol_count	0	32
+sol_count	1	20
+sol_count	2	18
+sol_count	3	9
+sol_count	4	10
+sol_count	5	3
+sol_count	6	5
+sol_count	8	2
+sol_count	12	1
+100	0.64	100	0.68	64	316898
+sol_count	0	26
+sol_count	1	27
+sol_count	2	22
+sol_count	3	8
+sol_count	4	14
+sol_count	6	2
+sol_count	8	1
+100	0.65	100	0.74	65	321327
+sol_count	0	41
+sol_count	1	20
+sol_count	2	22
+sol_count	3	3
+sol_count	4	7
+sol_count	6	1
+sol_count	7	2
+sol_count	8	2
+sol_count	9	1
+sol_count	10	1
+100	0.66	100	0.59	66	326562
+sol_count	0	32
+sol_count	1	24
+sol_count	2	15
+sol_count	3	15
+sol_count	4	9
+sol_count	5	1
+sol_count	6	2
+sol_count	7	1
+sol_count	12	1
+100	0.67	100	0.68	67	331331
+sol_count	0	36
+sol_count	1	20
+sol_count	2	27
+sol_count	3	8
+sol_count	4	8
+sol_count	6	1
+100	0.68	100	0.64	68	336522
+sol_count	0	40
+sol_count	1	19
+sol_count	2	19
+sol_count	3	3
+sol_count	4	11
+sol_count	5	4
+sol_count	6	2
+sol_count	8	1
+sol_count	9	1
+100	0.69	100	0.6	69	341717
+sol_count	0	30
+sol_count	1	24
+sol_count	2	25
+sol_count	3	10
+sol_count	4	6
+sol_count	5	2
+sol_count	6	3
+100	0.7	100	0.7	70	346589
+sol_count	0	35
+sol_count	1	26
+sol_count	2	22
+sol_count	3	5
+sol_count	4	6
+sol_count	5	1
+sol_count	6	3
+sol_count	7	1
+sol_count	10	1
+100	0.71	100	0.65	71	351721
+sol_count	0	34
+sol_count	1	19
+sol_count	2	21
+sol_count	3	14
+sol_count	4	5
+sol_count	5	1
+sol_count	6	2
+sol_count	8	3
+sol_count	27	1
+100	0.72	100	0.66	72	356036
+sol_count	0	43
+sol_count	1	23
+sol_count	2	17
+sol_count	3	7
+sol_count	4	3
+sol_count	5	1
+sol_count	6	2
+sol_count	7	1
+sol_count	8	2
+sol_count	12	1
+100	0.73	100	0.57	73	361189
+sol_count	0	41
+sol_count	1	21
+sol_count	2	23
+sol_count	3	6
+sol_count	4	3
+sol_count	5	1
+sol_count	6	4
+sol_count	10	1
+100	0.74	100	0.59	74	366879
+sol_count	0	39
+sol_count	1	16
+sol_count	2	27
+sol_count	3	4
+sol_count	4	5
+sol_count	5	1
+sol_count	6	2
+sol_count	8	4
+sol_count	10	1
+sol_count	18	1
+100	0.75	100	0.61	75	371646
+sol_count	0	44
+sol_count	1	12
+sol_count	2	23
+sol_count	3	8
+sol_count	4	10
+sol_count	5	2
+sol_count	6	1
+100	0.76	100	0.56	76	376497
+sol_count	0	43
+sol_count	1	17
+sol_count	2	20
+sol_count	3	7
+sol_count	4	10
+sol_count	5	1
+sol_count	6	1
+sol_count	14	1
+100	0.77	100	0.57	77	381193
+sol_count	0	34
+sol_count	1	23
+sol_count	2	18
+sol_count	3	8
+sol_count	4	8
+sol_count	5	3
+sol_count	6	1
+sol_count	8	2
+sol_count	10	2
+sol_count	11	1
+100	0.78	100	0.66	78	386108
+sol_count	0	28
+sol_count	1	19
+sol_count	2	23
+sol_count	3	13
+sol_count	4	11
+sol_count	6	3
+sol_count	8	1
+sol_count	12	1
+sol_count	14	1
+100	0.79	100	0.72	79	391397
+sol_count	0	32
+sol_count	1	16
+sol_count	2	23
+sol_count	3	14
+sol_count	4	7
+sol_count	5	2
+sol_count	6	4
+sol_count	10	1
+sol_count	14	1
+100	0.8	100	0.68	80	396199
+sol_count	0	34
+sol_count	1	21
+sol_count	2	25
+sol_count	3	9
+sol_count	4	1
+sol_count	5	1
+sol_count	6	5
+sol_count	8	2
+sol_count	12	1
+sol_count	32	1
+100	0.81	100	0.66	81	400806
+sol_count	0	32
+sol_count	1	22
+sol_count	2	21
+sol_count	3	10
+sol_count	4	6
+sol_count	5	1
+sol_count	6	5
+sol_count	8	1
+sol_count	9	1
+sol_count	16	1
+100	0.82	100	0.68	82	405178
+sol_count	0	45
+sol_count	1	18
+sol_count	2	18
+sol_count	3	6
+sol_count	4	4
+sol_count	6	5
+sol_count	8	1
+sol_count	10	1
+sol_count	16	1
+sol_count	18	1
+100	0.83	100	0.55	83	411455
+sol_count	0	35
+sol_count	1	19
+sol_count	2	22
+sol_count	3	5
+sol_count	4	11
+sol_count	5	2
+sol_count	6	3
+sol_count	8	1
+sol_count	9	1
+sol_count	16	1
+100	0.84	100	0.65	84	415839
+sol_count	0	34
+sol_count	1	22
+sol_count	2	22
+sol_count	3	6
+sol_count	4	10
+sol_count	6	4
+sol_count	8	1
+sol_count	13	1
+100	0.85	100	0.66	85	420464
+sol_count	0	43
+sol_count	1	19
+sol_count	2	21
+sol_count	3	6
+sol_count	4	7
+sol_count	5	3
+sol_count	10	1
+100	0.86	100	0.57	86	425751
+sol_count	0	35
+sol_count	1	16
+sol_count	2	24
+sol_count	3	9
+sol_count	4	13
+sol_count	6	3
+100	0.87	100	0.65	87	430635
+sol_count	0	36
+sol_count	1	21
+sol_count	2	22
+sol_count	3	8
+sol_count	4	5
+sol_count	5	1
+sol_count	6	2
+sol_count	7	2
+sol_count	8	2
+sol_count	12	1
+100	0.88	100	0.64	88	435462
+sol_count	0	44
+sol_count	1	16
+sol_count	2	26
+sol_count	3	6
+sol_count	4	6
+sol_count	6	1
+sol_count	14	1
+100	0.89	100	0.56	89	440410
+sol_count	0	38
+sol_count	1	21
+sol_count	2	20
+sol_count	3	10
+sol_count	4	4
+sol_count	5	2
+sol_count	6	3
+sol_count	8	2
+100	0.9	100	0.62	90	445557
+sol_count	0	34
+sol_count	1	19
+sol_count	2	27
+sol_count	3	8
+sol_count	4	5
+sol_count	5	4
+sol_count	6	1
+sol_count	8	2
+100	0.91	100	0.66	91	450300
+sol_count	0	29
+sol_count	1	24
+sol_count	2	24
+sol_count	3	11
+sol_count	4	4
+sol_count	5	3
+sol_count	6	1
+sol_count	7	1
+sol_count	8	2
+sol_count	10	1
+100	0.92	100	0.71	92	455372
+sol_count	0	30
+sol_count	1	15
+sol_count	2	27
+sol_count	3	13
+sol_count	4	4
+sol_count	5	4
+sol_count	6	3
+sol_count	7	1
+sol_count	8	3
+100	0.93	100	0.7	93	460247
+sol_count	0	43
+sol_count	1	22
+sol_count	2	15
+sol_count	3	6
+sol_count	4	10
+sol_count	5	1
+sol_count	6	1
+sol_count	12	1
+sol_count	14	1
+100	0.94	100	0.57	94	465280
+sol_count	0	38
+sol_count	1	13
+sol_count	2	31
+sol_count	3	7
+sol_count	4	8
+sol_count	5	1
+sol_count	6	1
+sol_count	8	1
+100	0.95	100	0.62	95	470007
+sol_count	0	36
+sol_count	1	20
+sol_count	2	21
+sol_count	3	6
+sol_count	4	9
+sol_count	5	1
+sol_count	6	4
+sol_count	7	1
+sol_count	8	1
+sol_count	10	1
+100	0.96	100	0.64	96	475291
+sol_count	0	38
+sol_count	1	26
+sol_count	2	18
+sol_count	3	5
+sol_count	4	5
+sol_count	5	2
+sol_count	7	2
+sol_count	8	3
+sol_count	20	1
+100	0.97	100	0.62	97	480182
+sol_count	0	36
+sol_count	1	18
+sol_count	2	20
+sol_count	3	12
+sol_count	4	6
+sol_count	5	1
+sol_count	6	4
+sol_count	8	2
+sol_count	12	1
+100	0.98	100	0.64	98	485125
+sol_count	0	30
+sol_count	1	25
+sol_count	2	23
+sol_count	3	8
+sol_count	4	9
+sol_count	5	1
+sol_count	6	1
+sol_count	7	1
+sol_count	8	2
+100	0.99	100	0.7	99	490060
+sol_count	0	33
+sol_count	1	19
+sol_count	2	27
+sol_count	3	9
+sol_count	4	7
+sol_count	5	1
+sol_count	6	3
+sol_count	7	1
+100	1	100	0.67	100	495000
