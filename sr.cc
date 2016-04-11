@@ -633,7 +633,7 @@ template<class RankLookupType>
 int random_run(double timeout, int max_iter, int n, double p, bool all_sols,
                std::mt19937_64& rgen, bool use_phase_1, int seed, int gen_type, bool record_sol_sizes) {
     if (gen_type == 9) {
-        if      (p == 1)  gen_type = 7;
+        if      (p == 1)  gen_type = 8;
         else if (p > 0.7) gen_type = 4;
         else              gen_type = 2;
     }
